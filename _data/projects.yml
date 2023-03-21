@@ -1,0 +1,26 @@
+- project :
+    print: True # If 'False' is selected, it will not be displayed in 'home.html > aside > .proj-content'. 
+    modal: True # If 'True' is selected, modal can open in 'portfolio.html'. 
+    url: https://robertgregg.github.io/CellularPotts.jl/dev/ # Full URL
+    image:
+      path: "cellpotts_home.png" # path: assets/project/
+      alt: "A screenshot of the cellular potts .jl homepage"
+    date: 03/2023 &ndash; Developing
+    title: CellularPotts.jl
+    summary: Modeling cells in-silico.
+    description: A Julia package to simulate dynamic biological cells
+    contents:
+        - title: 1. Dynamic simulations
+          image:
+            path: LetsGetMoving.gif
+            alt: "A gif of a moving cell"
+          description: Provides methods for
+            <li>- Cell movement</li>
+            <li>- Diffusion</li>
+            <li>- ODE integration</li>
+        - title: 2. Well documented
+          image:
+            path: docs.png
+            alt: "A screenshot of documentation"
+
+          
