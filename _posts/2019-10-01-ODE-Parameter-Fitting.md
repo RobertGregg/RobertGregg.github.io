@@ -42,14 +42,14 @@ G(0) = 0\\
 m(0) = m_0
 $$
 
-The model above consists of four unknown parameters $[k,\beta,\tau,m_0]$ with $m_0$ being the initial amount of GFP mRNA that entered the cell. Because this is such a simplistic model, we can derive an analytical solution to the system of ODEs:
+The model above consists of four unknown parameters $$[k,\beta,\tau,m_0]$$ with $$m_0$$ being the initial amount of GFP mRNA that entered the cell. Because this is such a simplistic model, we can derive an analytical solution to the system of ODEs:
 
 $$
 m(t) = m_0 e^{-\tau t}\\
 G(t) = \frac{k \cdot m_0}{\beta-\tau} \left( e^{-\tau t} - e^{-\beta t} \right).
 $$
 
-There is an important note to make here about **parameter identifiability**. We only have a measurement for $G(t)$ which means $m_0$ and $k$ cannot be uniquely determined, but there product ($m_0 \cdot k$) can be. This is a common occurrence in determining ODE parameter values and is difficult to determine without the analytical solution.
+There is an important note to make here about **parameter identifiability**. We only have a measurement for $$G(t)$$ which means $$m_0$$ and $$k$$ cannot be uniquely determined, but there product ($$m_0 \cdot k$$) can be. This is a common occurrence in determining ODE parameter values and is difficult to determine without the analytical solution.
 
 ### Determine the Best Fit
 

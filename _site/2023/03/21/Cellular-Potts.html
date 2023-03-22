@@ -31,8 +31,8 @@
 <meta property="og:title" content="Adding ODEs to CellularPotts.jl" />
 <meta name="author" content="Robert Gregg" />
 <meta property="og:locale" content="en_GB" />
-<meta name="description" content="In this blog post, we’ll work toward creating a model that simulates cellular division." />
-<meta property="og:description" content="In this blog post, we’ll work toward creating a model that simulates cellular division." />
+<meta name="description" content="In this blog post, we’ll demonstrate how to combine two modeling paradigms to simulate a population of cells dividing." />
+<meta property="og:description" content="In this blog post, we’ll demonstrate how to combine two modeling paradigms to simulate a population of cells dividing." />
 <link rel="canonical" href="http://localhost:4000/2023/03/21/Cellular-Potts.html" />
 <meta property="og:url" content="http://localhost:4000/2023/03/21/Cellular-Potts.html" />
 <meta property="og:site_name" content="Robert Gregg" />
@@ -43,7 +43,7 @@
 <meta name="twitter:site" content="@RobertWGregg" />
 <meta name="twitter:creator" content="@Robert Gregg" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Robert Gregg"},"dateModified":"2023-03-21T00:00:00-07:00","datePublished":"2023-03-21T00:00:00-07:00","description":"In this blog post, we’ll work toward creating a model that simulates cellular division.","headline":"Adding ODEs to CellularPotts.jl","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2023/03/21/Cellular-Potts.html"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/assets/img/headshot.jpg"},"name":"Robert Gregg"},"url":"http://localhost:4000/2023/03/21/Cellular-Potts.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Robert Gregg"},"dateModified":"2023-03-21T00:00:00-07:00","datePublished":"2023-03-21T00:00:00-07:00","description":"In this blog post, we’ll demonstrate how to combine two modeling paradigms to simulate a population of cells dividing.","headline":"Adding ODEs to CellularPotts.jl","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2023/03/21/Cellular-Potts.html"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/assets/img/headshot.jpg"},"name":"Robert Gregg"},"url":"http://localhost:4000/2023/03/21/Cellular-Potts.html"}</script>
 <!-- End Jekyll SEO tag -->
 
 </head>
@@ -93,10 +93,238 @@
     </p>
   </section>
   <section class="post-content">
-    <p>In this blog post, we’ll work toward creating a model that simulates cellular division.</p>
+    <p>In this blog post, we’ll demonstrate how to combine two modeling paradigms to simulate a population of cells dividing.</p>
 
 <p><img src="/assets/img/BringingODEsToLife.gif" alt="BringingODEsToLife" class="width-80" /></p>
 
+<p>In the animation above, we see relatively circular blobs that represent cells adhering to one another. The color of each cell relates to the concentration of a theoretical protein X that controls cellular division. As we move forward in time, the concentration of protein X increases to a maximum value of one which triggers the cell to divide into two daughter cells. Protein X seems to be randomly distribute between the two new cells after division. The two daughter cells also seem to quickly grow to match the size of the other cells.</p>
+
+<p>Let’s walk through the code to develop this simulation. There are two characteristics that need to modeled in this simulation, the first being the geometry of each cell and the second being the dynamics of the intracellular proteins. Let’s walk through the Julia code used to simulate these models.</p>
+
+<p>We begin by loading in both <code class="language-plaintext highlighter-rouge">CellularPotts.jl</code> and <code class="language-plaintext highlighter-rouge">DifferentialEquations.jl</code> which model the geometry and dynamics respectively.</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="n">CellularPotts</span><span class="x">,</span> <span class="n">DifferentialEquations</span>
+</code></pre></div></div>
+
+<h2 id="cellular-potts-modeling">Cellular Potts Modeling</h2>
+
+<p>A Cellular Potts Model (CPM) works by defining an array of integer IDs that represent the space where cells are located. Each value in the array corresponds to different objects in the simulation, for example, a value of 0 could represent a point in space with no cell present and a value of 2 could belong to the a second cell introduced into the simulation.</p>
+
+<p><img src="/assets/img/cellPottsEx.png" alt="" class="width-80" /></p>
+
+<p>As the CPM steps forward in time, values in the grid and replaced with neighboring value. Penalties (like a cell volume constraint) are added to ensure the simulation mimic desired cell behaviors.</p>
+
+<p>Let’s use <code class="language-plaintext highlighter-rouge">CellularPotts.jl</code>  to create a new model which requires:</p>
+
+<ul>
+  <li>
+    <p>A space for cells to occupy</p>
+  </li>
+  <li>
+    <p>A table that summarizes the cells we want to initialize</p>
+  </li>
+  <li>
+    <p>A list of penalties to promote desired cell behaviors</p>
+  </li>
+</ul>
+
+<p>The space we will use is a 200×200 grid that defaults to periodic boundary conditions</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">space</span> <span class="o">=</span> <span class="n">CellSpace</span><span class="x">(</span><span class="mi">200</span><span class="x">,</span><span class="mi">200</span><span class="x">)</span>
+</code></pre></div></div>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="mi">200</span><span class="n">×200</span> <span class="n">Periodic</span> <span class="mi">8</span><span class="o">-</span><span class="n">Neighbor</span> <span class="n">CellSpace</span><span class="x">{</span><span class="mi">2</span><span class="x">,</span><span class="kt">Int64</span><span class="x">}</span>
+</code></pre></div></div>
+
+<p>Next we need to initialize what cells we want in the model.</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">initialCellState</span> <span class="o">=</span> <span class="n">CellTable</span><span class="x">(</span>
+    <span class="x">[</span><span class="o">:</span><span class="n">Epithelial</span><span class="x">],</span>
+    <span class="x">[</span><span class="mi">200</span><span class="x">],</span>
+    <span class="x">[</span><span class="mi">1</span><span class="x">])</span>
+
+<span class="n">positions</span> <span class="o">=</span> <span class="x">[</span><span class="n">size</span><span class="x">(</span><span class="n">space</span><span class="x">)</span> <span class="o">.÷</span> <span class="mi">2</span><span class="x">]</span>
+<span class="n">initialCellState</span> <span class="o">=</span> <span class="n">addcellproperty</span><span class="x">(</span><span class="n">initialCellState</span><span class="x">,</span> <span class="o">:</span><span class="n">positions</span><span class="x">,</span> <span class="n">positions</span><span class="x">)</span>
+</code></pre></div></div>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">┌────────────┬─────────┬─────────┬─────────┬────────────────┬────────────┬───────────────────┬─────────────────────┐</span>
+<span class="n">│</span>      <span class="n">names</span> <span class="n">│</span> <span class="n">cellIDs</span> <span class="n">│</span> <span class="n">typeIDs</span> <span class="n">│</span> <span class="n">volumes</span> <span class="n">│</span> <span class="n">desiredVolumes</span> <span class="n">│</span> <span class="n">perimeters</span> <span class="n">│</span> <span class="n">desiredPerimeters</span> <span class="n">│</span>           <span class="n">positions</span> <span class="n">│</span>
+<span class="n">│</span>     <span class="kt">Symbol</span> <span class="n">│</span>   <span class="kt">Int64</span> <span class="n">│</span>   <span class="kt">Int64</span> <span class="n">│</span>   <span class="kt">Int64</span> <span class="n">│</span>          <span class="kt">Int64</span> <span class="n">│</span>      <span class="kt">Int64</span> <span class="n">│</span>             <span class="kt">Int64</span> <span class="n">│</span> <span class="kt">Tuple</span><span class="x">{</span><span class="kt">Int64</span><span class="x">,</span> <span class="kt">Int64</span><span class="x">}</span> <span class="n">│</span>
+<span class="n">├────────────┼─────────┼─────────┼─────────┼────────────────┼────────────┼───────────────────┼─────────────────────┤</span>
+<span class="n">│</span>     <span class="n">Medium</span> <span class="n">│</span>       <span class="mi">0</span> <span class="n">│</span>       <span class="mi">0</span> <span class="n">│</span>       <span class="mi">0</span> <span class="n">│</span>              <span class="mi">0</span> <span class="n">│</span>          <span class="mi">0</span> <span class="n">│</span>                 <span class="mi">0</span> <span class="n">│</span>          <span class="x">(</span><span class="mi">100</span><span class="x">,</span> <span class="mi">100</span><span class="x">)</span> <span class="n">│</span>
+<span class="n">│</span> <span class="n">Epithelial</span> <span class="n">│</span>       <span class="mi">1</span> <span class="n">│</span>       <span class="mi">1</span> <span class="n">│</span>       <span class="mi">0</span> <span class="n">│</span>            <span class="mi">200</span> <span class="n">│</span>          <span class="mi">0</span> <span class="n">│</span>               <span class="mi">168</span> <span class="n">│</span>          <span class="x">(</span><span class="mi">100</span><span class="x">,</span> <span class="mi">100</span><span class="x">)</span> <span class="n">│</span>
+<span class="n">└────────────┴─────────┴─────────┴─────────┴────────────────┴────────────┴───────────────────┴─────────────────────┘</span>
+</code></pre></div></div>
+
+<p>Here we define one cell type (Epithelial) which has a desired area of 200 units and we only want 1 to start.</p>
+
+<p>Each row in the table <code class="language-plaintext highlighter-rouge">CellTable()</code> generates represents a cell and each column lists a property given to that cell. Other information, like the column’s type, is also provided.</p>
+
+<p>The first row will always show properties for “Medium”, the name given to grid locations without a cell type. Most values related to Medium are  either default or missing altogether. Here we see our one epithelial cell has a desired volume of 200 and perimeter of 168 which is the minimal perimeter penalty calculated from the desired volume.</p>
+
+<p>Additional properties can be added to our cells using the <code class="language-plaintext highlighter-rouge">addcellproperty</code> function. In this model we can provide a special property called positions to place our single cell in the middle of the space.</p>
+
+<p>Now that we have a space and a cell to fill it with, we need to provide a list of model penalties. Here we only include an <code class="language-plaintext highlighter-rouge">AdhesionPenalty</code> which encourages grid locations with the same cell type to stick together and a <code class="language-plaintext highlighter-rouge">VolumePenalty</code> which penalizes cells that deviate from their desired volume.</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">penalties</span> <span class="o">=</span> <span class="x">[</span>
+    <span class="n">AdhesionPenalty</span><span class="x">([</span><span class="mi">0</span> <span class="mi">20</span><span class="x">;</span>
+                     <span class="mi">20</span> <span class="mi">0</span><span class="x">]),</span>
+    <span class="n">VolumePenalty</span><span class="x">([</span><span class="mi">5</span><span class="x">])</span>
+    <span class="x">]</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">AdhesionPenalty</code> requires a symmetric matrix <code class="language-plaintext highlighter-rouge">J</code> where <code class="language-plaintext highlighter-rouge">J[n,m]</code> gives the adhesion penalty for cells with types n and m. In this model we penalize Epithelial cell locations adjacent to Medium. The <code class="language-plaintext highlighter-rouge">VolumePenalty</code> needs a vector of scaling factors (one for each cell type) that either increase or decrease the volume penalty contribution to the overall penalty. The scaling factor for <code class="language-plaintext highlighter-rouge">:Medium</code> is automatically set to zero.</p>
+
+<p>Now we can take these three objects and create a Cellular Potts Model object.</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cpm</span> <span class="o">=</span> <span class="n">CellPotts</span><span class="x">(</span><span class="n">space</span><span class="x">,</span> <span class="n">initialCellState</span><span class="x">,</span> <span class="n">penalties</span><span class="x">)</span>
+</code></pre></div></div>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Cell</span> <span class="n">Potts</span> <span class="n">Model</span><span class="o">:</span>
+<span class="n">Grid</span><span class="o">:</span> <span class="mi">200</span><span class="n">×200</span>
+<span class="n">Cell</span> <span class="n">Counts</span><span class="o">:</span> <span class="x">[</span><span class="n">Epithelial</span> <span class="n">→</span> <span class="mi">1</span><span class="x">]</span> <span class="x">[</span><span class="n">Total</span> <span class="n">→</span> <span class="mi">1</span><span class="x">]</span>
+<span class="n">Model</span> <span class="n">Penalties</span><span class="o">:</span> <span class="n">Adhesion</span> <span class="n">Volume</span>
+<span class="n">Temperature</span><span class="o">:</span> <span class="mf">20.0</span>
+<span class="n">Steps</span><span class="o">:</span> <span class="mi">0</span>
+</code></pre></div></div>
+
+<h2 id="differential-equation-modeling">Differential Equation modeling</h2>
+
+<p>This simulation actually extends <a href="https://diffeq.sciml.ai/latest/features/callback_functions/#Example-3:-Growing-Cell-Population">an example</a> from the <code class="language-plaintext highlighter-rouge">DifferentialEquations.jl</code> documentation describing a growing cell population, so much of the code has been taken from this example.</p>
+
+<p>Currently by default CellularPotts models to not record states as they change overtime to increase computational speed. To have the model record past states we can toggle the appropriate keyword.</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cpm</span><span class="o">.</span><span class="n">record</span> <span class="o">=</span> <span class="nb">true</span><span class="x">;</span>
+</code></pre></div></div>
+
+<p>As Protein X evolves over time for each cell, the CPM model also needs to step forward in time to try and minimize its energy. To facilitate this, we can use the callback feature from <code class="language-plaintext highlighter-rouge">DifferentialEquations.jl</code>. Here specifically we use the <code class="language-plaintext highlighter-rouge">PeriodicCallback</code> function which will stop the ODE solve at regular time intervals and run some other function for us (Here it will be the <code class="language-plaintext highlighter-rouge">ModelStep!</code> function).</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">function</span><span class="nf"> cpmUpdate!</span><span class="x">(</span><span class="n">integrator</span><span class="x">,</span> <span class="n">cpm</span><span class="x">)</span>
+    <span class="n">ModelStep!</span><span class="x">(</span><span class="n">cpm</span><span class="x">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cpmUpdate! (generic function with 1 method)
+</code></pre></div></div>
+
+<p>This timeScale variable below controls how often the callback is triggered. Larger timescales correspond to faster cell movement.</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">timeScale</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">pcb</span> <span class="o">=</span> <span class="n">PeriodicCallback</span><span class="x">(</span><span class="n">integrator</span> <span class="o">-&gt;</span> <span class="n">cpmUpdate!</span><span class="x">(</span><span class="n">integrator</span><span class="x">,</span> <span class="n">cpm</span><span class="x">),</span> <span class="mi">1</span><span class="o">/</span><span class="n">timeScale</span><span class="x">);</span>
+</code></pre></div></div>
+
+<p>The ODE functions are taken directly from the DifferentialEquations example. Each cell is given the following differential equation</p>
+
+\[\frac{\mathrm{d} X}{\mathrm{d} t} = \alpha X\]
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="n">α</span> <span class="o">=</span> <span class="mf">0.3</span>
+
+<span class="k">function</span><span class="nf"> f</span><span class="x">(</span><span class="n">du</span><span class="x">,</span><span class="n">u</span><span class="x">,</span><span class="n">p</span><span class="x">,</span><span class="n">t</span><span class="x">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="n">eachindex</span><span class="x">(</span><span class="n">u</span><span class="x">)</span>
+      <span class="n">du</span><span class="x">[</span><span class="n">i</span><span class="x">]</span> <span class="o">=</span> <span class="n">α</span><span class="o">*</span><span class="n">u</span><span class="x">[</span><span class="n">i</span><span class="x">]</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>f (generic function with 1 method)
+</code></pre></div></div>
+
+<p>Also coming from the differential equations example, this callback is triggered whenever Protein X is greater than 1. Basically the cell will divide when when the Protein X concentration is too large.</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">condition</span><span class="x">(</span><span class="n">u</span><span class="x">,</span><span class="n">t</span><span class="x">,</span><span class="n">integrator</span><span class="x">)</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">maximum</span><span class="x">(</span><span class="n">u</span><span class="x">)</span>
+
+<span class="k">function</span><span class="nf"> affect!</span><span class="x">(</span><span class="n">integrator</span><span class="x">,</span><span class="n">cpm</span><span class="x">)</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">u</span>
+    <span class="n">resize!</span><span class="x">(</span><span class="n">integrator</span><span class="x">,</span><span class="n">length</span><span class="x">(</span><span class="n">u</span><span class="x">)</span><span class="o">+</span><span class="mi">1</span><span class="x">)</span>
+    <span class="n">cellID</span> <span class="o">=</span> <span class="n">findmax</span><span class="x">(</span><span class="n">u</span><span class="x">)[</span><span class="mi">2</span><span class="x">]</span>
+    <span class="n">Θ</span> <span class="o">=</span> <span class="n">rand</span><span class="x">()</span>
+    <span class="n">u</span><span class="x">[</span><span class="n">cellID</span><span class="x">]</span> <span class="o">=</span> <span class="n">Θ</span>
+    <span class="n">u</span><span class="x">[</span><span class="k">end</span><span class="x">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">Θ</span>
+
+    <span class="c">#Adding a call to divide the cells in the CPM</span>
+    <span class="n">CellDivision!</span><span class="x">(</span><span class="n">cpm</span><span class="x">,</span> <span class="n">cellID</span><span class="o">-</span><span class="mi">1</span><span class="x">)</span>
+    <span class="k">return</span> <span class="nb">nothing</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>affect! (generic function with 1 method)
+</code></pre></div></div>
+
+<p>This will instantiate the ContinuousCallback triggering cell division</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ccb</span> <span class="o">=</span> <span class="n">ContinuousCallback</span><span class="x">(</span><span class="n">condition</span><span class="x">,</span><span class="n">integrator</span> <span class="o">-&gt;</span> <span class="n">affect!</span><span class="x">(</span><span class="n">integrator</span><span class="x">,</span> <span class="n">cpm</span><span class="x">));</span>
+</code></pre></div></div>
+
+<p>To pass multiple callbacks, we need to collect them into a set.</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">callbacks</span> <span class="o">=</span> <span class="n">CallbackSet</span><span class="x">(</span><span class="n">pcb</span><span class="x">,</span> <span class="n">ccb</span><span class="x">);</span>
+</code></pre></div></div>
+
+<p>Define the ODE model and solve</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">tspan</span> <span class="o">=</span> <span class="x">(</span><span class="mf">0.0</span><span class="x">,</span><span class="mf">20.0</span><span class="x">)</span>
+<span class="n">prob</span> <span class="o">=</span> <span class="n">ODEProblem</span><span class="x">(</span><span class="n">f</span><span class="x">,</span><span class="n">u0</span><span class="x">,</span><span class="n">tspan</span><span class="x">)</span>
+<span class="n">sol</span> <span class="o">=</span> <span class="n">solve</span><span class="x">(</span><span class="n">prob</span><span class="x">,</span> <span class="n">Tsit5</span><span class="x">(),</span> <span class="n">callback</span><span class="o">=</span><span class="n">callbacks</span><span class="x">);</span>
+</code></pre></div></div>
+
+<h2 id="visualization">Visualization</h2>
+
+<p>We can replicate the plots from the original example</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="n">Plots</span><span class="x">,</span> <span class="n">Printf</span><span class="x">,</span> <span class="n">ColorSchemes</span>
+</code></pre></div></div>
+
+<p>Plot the total cell count over time</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plot</span><span class="x">(</span><span class="n">sol</span><span class="o">.</span><span class="n">t</span><span class="x">,</span><span class="n">map</span><span class="x">((</span><span class="n">x</span><span class="x">)</span><span class="o">-&gt;</span><span class="n">length</span><span class="x">(</span><span class="n">x</span><span class="x">),</span><span class="n">sol</span><span class="x">[</span><span class="o">:</span><span class="x">]),</span><span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="x">,</span>
+     <span class="n">ylabel</span><span class="o">=</span><span class="s">"Number of Cells"</span><span class="x">,</span><span class="n">xlabel</span><span class="o">=</span><span class="s">"Time"</span><span class="x">,</span><span class="n">legend</span><span class="o">=</span><span class="nb">nothing</span><span class="x">)</span>
+</code></pre></div></div>
+
+<p><img src="/assets/img/cellPopulation.png" alt="" class="width-50" /></p>
+
+<p>Plot Protein X dynamics for a specific cell</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ts</span> <span class="o">=</span> <span class="n">range</span><span class="x">(</span><span class="mi">0</span><span class="x">,</span> <span class="n">stop</span><span class="o">=</span><span class="mi">20</span><span class="x">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">100</span><span class="x">)</span>
+<span class="n">plot</span><span class="x">(</span><span class="n">ts</span><span class="x">,</span><span class="n">map</span><span class="x">((</span><span class="n">x</span><span class="x">)</span><span class="o">-&gt;</span><span class="n">x</span><span class="x">[</span><span class="mi">2</span><span class="x">],</span><span class="n">sol</span><span class="o">.</span><span class="x">(</span><span class="n">ts</span><span class="x">)),</span><span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="x">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s">"Amount of X in Cell 1"</span><span class="x">,</span><span class="n">xlabel</span><span class="o">=</span><span class="s">"Time"</span><span class="x">,</span><span class="n">legend</span><span class="o">=</span><span class="nb">nothing</span><span class="x">)</span>
+</code></pre></div></div>
+
+<p><img src="/assets/img/cellDynamics.png" alt="" class="width-80" /></p>
+
+<p>Finally, we can provide the code used to produce the animation we saw at the beginning. I’ve dropped the first few frames because the first cell takes a while to divide.</p>
+
+<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">proteinXConc</span> <span class="o">=</span> <span class="n">zeros</span><span class="x">(</span><span class="n">size</span><span class="x">(</span><span class="n">space</span><span class="x">))</span>
+
+<span class="n">anim</span> <span class="o">=</span> <span class="nd">@animate</span> <span class="k">for</span> <span class="n">t</span> <span class="k">in</span> <span class="n">Iterators</span><span class="o">.</span><span class="n">drop</span><span class="x">(</span><span class="mi">1</span><span class="o">:</span><span class="n">cpm</span><span class="o">.</span><span class="n">step</span><span class="o">.</span><span class="n">stepCounter</span><span class="x">,</span><span class="mi">5</span><span class="o">*</span><span class="n">timeScale</span><span class="x">)</span>
+    <span class="n">currTime</span> <span class="o">=</span> <span class="nd">@sprintf</span> <span class="s">"Time: %.2f"</span> <span class="n">t</span><span class="o">/</span><span class="n">timeScale</span>
+
+    <span class="n">space</span> <span class="o">=</span> <span class="n">cpm</span><span class="x">(</span><span class="n">t</span><span class="x">)</span><span class="o">.</span><span class="n">space</span>
+    <span class="n">currSol</span> <span class="o">=</span> <span class="n">sol</span><span class="x">((</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="x">)</span><span class="o">/</span><span class="n">timeScale</span> <span class="x">)</span>
+
+    <span class="c">#Map protein concentrations to space</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="kt">CartesianIndices</span><span class="x">(</span><span class="n">space</span><span class="o">.</span><span class="n">nodeIDs</span><span class="x">)</span>
+        <span class="n">proteinXConc</span><span class="x">[</span><span class="n">i</span><span class="x">]</span> <span class="o">=</span> <span class="n">currSol</span><span class="x">[</span><span class="n">space</span><span class="o">.</span><span class="n">nodeIDs</span><span class="x">[</span><span class="n">i</span><span class="x">]</span><span class="o">+</span><span class="mi">1</span><span class="x">]</span>
+    <span class="k">end</span>
+
+    <span class="n">plotObject</span> <span class="o">=</span> <span class="n">heatmap</span><span class="x">(</span>
+        <span class="n">proteinXConc</span><span class="err">'</span><span class="x">,</span>
+        <span class="n">axis</span><span class="o">=</span><span class="nb">nothing</span><span class="x">,</span>
+        <span class="n">framestyle</span> <span class="o">=</span> <span class="o">:</span><span class="n">box</span><span class="x">,</span>
+        <span class="n">aspect_ratio</span><span class="o">=:</span><span class="n">equal</span><span class="x">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="x">(</span><span class="mi">600</span><span class="x">,</span><span class="mi">600</span><span class="x">),</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">cgrad</span><span class="x">([</span><span class="o">:</span><span class="n">grey90</span><span class="x">,</span> <span class="o">:</span><span class="n">grey</span><span class="x">,</span> <span class="o">:</span><span class="n">gold</span><span class="x">],</span> <span class="x">[</span><span class="mf">0.1</span><span class="x">,</span> <span class="mf">0.6</span><span class="x">,</span> <span class="mf">0.9</span><span class="x">]),</span>
+        <span class="n">clims</span> <span class="o">=</span> <span class="x">(</span><span class="mi">0</span><span class="x">,</span><span class="mi">1</span><span class="x">),</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">currTime</span><span class="x">,</span>
+        <span class="n">titlefontsize</span> <span class="o">=</span> <span class="mi">36</span><span class="x">,</span>
+        <span class="n">xlims</span><span class="o">=</span><span class="x">(</span><span class="mf">0.5</span><span class="x">,</span> <span class="n">size</span><span class="x">(</span><span class="n">space</span><span class="o">.</span><span class="n">nodeIDs</span><span class="x">,</span><span class="mi">1</span><span class="x">)</span><span class="o">+</span><span class="mf">0.5</span><span class="x">),</span>
+        <span class="n">ylims</span><span class="o">=</span><span class="x">(</span><span class="mf">0.5</span><span class="x">,</span> <span class="n">size</span><span class="x">(</span><span class="n">space</span><span class="o">.</span><span class="n">nodeIDs</span><span class="x">,</span><span class="mi">2</span><span class="x">)</span><span class="o">+</span><span class="mf">0.5</span><span class="x">))</span>
+
+    <span class="n">cellborders!</span><span class="x">(</span><span class="n">plotObject</span><span class="x">,</span><span class="n">space</span><span class="x">)</span>
+
+    <span class="n">plotObject</span>
+<span class="k">end</span>
+
+<span class="n">gif</span><span class="x">(</span><span class="n">anim</span><span class="x">,</span> <span class="s">"BringingODEsToLife.gif"</span><span class="x">,</span> <span class="n">fps</span> <span class="o">=</span> <span class="mi">30</span><span class="x">)</span>
+</code></pre></div></div>
 
   </section>
 </div>
