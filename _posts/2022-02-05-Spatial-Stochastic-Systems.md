@@ -25,7 +25,7 @@ $$
 
 The variable $$x$$ tracks the number of prey which increases by breeding through $$\alpha$$ and decreases when consumed by a predator through $$\beta$$. Likewise, the variable $$y$$ increases as prey is consumed and decreases as predators become overpopulated. We can simulate a discretized version of this system using the `DiffEqJump.jl` and `Cataylst.jl`, packages that are a part of the [SciML](https://sciml.ai/) ecosystem.
 
-```julia
+<pre><code class="julia">
 using DiffEqJump, Catalyst, Plots
 
 #"Reactions" for the Lotka–Volterra equations
@@ -47,7 +47,7 @@ jump_prob = JumpProblem(LV_model, prob, RSSA()) #rejection stochastic simulation
 sol = solve(jump_prob, SSAStepper())
 
 plot(sol, framestyle=:box, title="Discrete Lotka-Volterra Simulation")
-```
+</code></pre>
 
 ![LV_sim](/assets/img/LV_sim.svg){: .width-80}
 
@@ -64,7 +64,7 @@ To extend this model and include location information for prey and predators, I 
 Putting everything together gives:
 
 
-```julia
+<pre><code class="julia">
 using DiffEqJump, Catalyst
 
 #Create a grid for animals to live on
@@ -113,7 +113,7 @@ jumpProb = JumpProblem(prob, alg, massActionJumps, hopping_constants=hopConstant
 
 #Solve the JumpProblem
 sol = solve(jumpProb, SSAStepper(), saveat=0.1)
-```
+</code></pre>
 
 The most confusing part is probably the generation of the mass action jump and is best explained through example. The reactant stoichiometry matrix records which species are reactants for every reaction. Here we have 2 species and 4 reactions, meaning `substoichmat(LV_model)` will give the following 2×4 matrix:
 
@@ -126,13 +126,13 @@ $$
 
 The second column (for example) corresponds to the reaction: `x + y --> y`. Both rows have a one because both x and y are reactants. This needs to be converted into a vector of `Pairs` where the first number corresponds to the species and the second number to the value in the matrix. For the matrix above we would get:
 
-```julia
+<pre><code class="julia">
 4-element Vector{Vector{Pair{Int64, Int64}}}:
  [1 => 1]            # x --> 2x
  [1 => 1, 2 => 1]    # x + y --> y
  [1 => 1, 2 => 1]    # x + y --> 2y
  [2 => 1]            # y --> ∅
-```
+</code></pre>
 
 There may be a better way to generate this structure from the `@reaction_network` directly, but I could not find it. Once you have these structures for the reactants and the net stoichiometry, the rest is just passing variables to the solver, which has been specifically tailored to deal with these types of problems. 
 
@@ -140,7 +140,7 @@ Any SSA solver could solve this problem, but solvers like `NSM()` optimize the s
 
 To visualize the solution, we can make a quick animation:
 
-```julia
+<pre><code class="julia">
 using Plots, Printf
 
 #Plot an animation of the pedators and prey interacting
@@ -151,7 +151,7 @@ anim = @animate for (currState,t) in tuples(sol)
     p2 = heatmap( reshape(currState[2,:],dim), alpha=1.0, c=:Oranges_9, clims=(0,400),framestyle = :box, aspect_ratio=:equal,xlims=(1,dim[1]),ylims=(1,dim[1]), xlabel="Predators")
     plot(p1,p2, layout=(1,2))
 end
-```
+</code></pre>
 
 
 ![anim](/assets/img/anim.gif){: .width-80}

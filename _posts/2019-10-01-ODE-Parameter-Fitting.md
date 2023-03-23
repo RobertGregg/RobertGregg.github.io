@@ -55,10 +55,10 @@ There is an important note to make here about **parameter identifiability**. We 
 
 Using Julia, we can code the ODE model we can run an optimization routine to solve for the parameter values.
 
-```julia
+<pre><code class="julia">
 #Importing packages
-	using DifferentialEquations, Random, Plots #Creating ODEs and Plotting
-	using DiffEqParamEstim, Optim #For finding best fit parameters
+using DifferentialEquations, Random, Plots #Creating ODEs and Plotting
+using DiffEqParamEstim, Optim #For finding best fit parameters
 
 ###############################################
 # Define the ODE Model
@@ -110,7 +110,7 @@ Using Julia, we can code the ODE model we can run an optimization routine to sol
 	probOpt = remake(prob,p=result.minimizer)
 	solOpt = solve(probOpt,Tsit5())
 	plot!(solOpt,labels=:Optimized,linestyle = :dash)
-```
+</code></pre>
 
 ![Figure_GFP_fit]({{ site.baseurl }}/assets/img/Figure_GFP_fit.svg){: .width-80}
 

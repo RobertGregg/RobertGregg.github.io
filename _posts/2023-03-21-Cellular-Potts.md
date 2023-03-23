@@ -18,9 +18,8 @@ Let's walk through the code to develop this simulation. There are two characteri
 
 We begin by loading in both `CellularPotts.jl` and `DifferentialEquations.jl` which model the geometry and dynamics respectively.
 
-```julia
-using CellularPotts, DifferentialEquations
-```
+<pre><code class="julia">using CellularPotts, DifferentialEquations
+</code></pre>
 
 ## Cellular Potts Modeling
 
@@ -33,77 +32,66 @@ As the CPM steps forward in time, values in the grid and replaced with neighbori
 Let's use `CellularPotts.jl`  to create a new model which requires:
 
 - A space for cells to occupy
-
 - A table that summarizes the cells we want to initialize
-
 - A list of penalties to promote desired cell behaviors
 
 The space we will use is a 200×200 grid that defaults to periodic boundary conditions
 
-```julia
-space = CellSpace(200,200)
-```
-
-```julia
+<pre><code class="julia">space = CellSpace(200,200)
 200×200 Periodic 8-Neighbor CellSpace{2,Int64}
-```
+</code></pre>
 
 Next we need to initialize what cells we want in the model.
 
-```julia
-initialCellState = CellTable(
+<pre><code class="julia">initialCellState = CellTable(
     [:Epithelial],
     [200],
     [1])
 
 positions = [size(space) .÷ 2]
 initialCellState = addcellproperty(initialCellState, :positions, positions)
-```
+</code></pre>
 
-```julia
-┌────────────┬─────────┬─────────┬─────────┬────────────────┬────────────┬───────────────────┬─────────────────────┐
+<pre><code class="julia">┌────────────┬─────────┬─────────┬─────────┬────────────────┬────────────┬───────────────────┬─────────────────────┐
 │      names │ cellIDs │ typeIDs │ volumes │ desiredVolumes │ perimeters │ desiredPerimeters │           positions │
 │     Symbol │   Int64 │   Int64 │   Int64 │          Int64 │      Int64 │             Int64 │ Tuple{Int64, Int64} │
 ├────────────┼─────────┼─────────┼─────────┼────────────────┼────────────┼───────────────────┼─────────────────────┤
 │     Medium │       0 │       0 │       0 │              0 │          0 │                 0 │          (100, 100) │
 │ Epithelial │       1 │       1 │       0 │            200 │          0 │               168 │          (100, 100) │
 └────────────┴─────────┴─────────┴─────────┴────────────────┴────────────┴───────────────────┴─────────────────────┘
-```
+</code></pre>
 
 Here we define one cell type (Epithelial) which has a desired area of 200 units and we only want 1 to start. 
-
+<br><br>
 Each row in the table `CellTable()` generates represents a cell and each column lists a property given to that cell. Other information, like the column's type, is also provided. 
-
+<br><br>
 The first row will always show properties for "Medium", the name given to grid locations without a cell type. Most values related to Medium are  either default or missing altogether. Here we see our one epithelial cell has a desired volume of 200 and perimeter of 168 which is the minimal perimeter penalty calculated from the desired volume. 
-
+<br><br>
 Additional properties can be added to our cells using the `addcellproperty` function. In this model we can provide a special property called positions to place our single cell in the middle of the space. 
-
+<br><br>
 Now that we have a space and a cell to fill it with, we need to provide a list of model penalties. Here we only include an `AdhesionPenalty` which encourages grid locations with the same cell type to stick together and a `VolumePenalty` which penalizes cells that deviate from their desired volume.
 
-```julia
-penalties = [
+<pre><code class="julia">penalties = [
     AdhesionPenalty([0 20;
                      20 0]),
     VolumePenalty([5])
     ]
-```
+</code></pre>
 
 `AdhesionPenalty` requires a symmetric matrix `J` where `J[n,m]` gives the adhesion penalty for cells with types n and m. In this model we penalize Epithelial cell locations adjacent to Medium. The `VolumePenalty` needs a vector of scaling factors (one for each cell type) that either increase or decrease the volume penalty contribution to the overall penalty. The scaling factor for `:Medium` is automatically set to zero.
 
 Now we can take these three objects and create a Cellular Potts Model object.
 
-```julia
-cpm = CellPotts(space, initialCellState, penalties)
-```
+<pre><code class="julia">cpm = CellPotts(space, initialCellState, penalties)
+</code></pre>
 
-```julia
-Cell Potts Model:
+<pre><code class="julia">Cell Potts Model:
 Grid: 200×200
 Cell Counts: [Epithelial → 1] [Total → 1]
 Model Penalties: Adhesion Volume
 Temperature: 20.0
 Steps: 0
-```
+</code></pre>
 
 ## Differential Equation modeling
 
@@ -111,28 +99,24 @@ This simulation actually extends [an example](https://diffeq.sciml.ai/latest/fea
 
 Currently by default CellularPotts models to not record states as they change overtime to increase computational speed. To have the model record past states we can toggle the appropriate keyword.
 
-```julia
-cpm.record = true;
-```
+<pre><code class="julia">cpm.record = true;
+</code></pre>
 
 As Protein X evolves over time for each cell, the CPM model also needs to step forward in time to try and minimize its energy. To facilitate this, we can use the callback feature from `DifferentialEquations.jl`. Here specifically we use the `PeriodicCallback` function which will stop the ODE solve at regular time intervals and run some other function for us (Here it will be the `ModelStep!` function).
 
-```julia
-function cpmUpdate!(integrator, cpm)
+<pre><code class="julia">function cpmUpdate!(integrator, cpm)
     ModelStep!(cpm)
 end
-```
+</code></pre>
 
-```
-cpmUpdate! (generic function with 1 method)
-```
+<pre><code class="julia">cpmUpdate! (generic function with 1 method)
+</code></pre>
 
 This timeScale variable below controls how often the callback is triggered. Larger timescales correspond to faster cell movement.
 
-```julia
-timeScale = 100
+<pre><code class="julia">timeScale = 100
 pcb = PeriodicCallback(integrator -> cpmUpdate!(integrator, cpm), 1/timeScale);
-```
+</code></pre>
 
 The ODE functions are taken directly from the DifferentialEquations example. Each cell is given the following differential equation
 
@@ -140,24 +124,18 @@ $$
 \frac{\mathrm{d} X}{\mathrm{d} t} = \alpha X
 $$
 
-```julia
-const α = 0.3
+<pre><code class="julia">const α = 0.3
 
 function f(du,u,p,t)
     for i in eachindex(u)
       du[i] = α*u[i]
     end
 end
-```
-
-```
-f (generic function with 1 method)
-```
+</code></pre>
 
 Also coming from the differential equations example, this callback is triggered whenever Protein X is greater than 1. Basically the cell will divide when when the Protein X concentration is too large.
 
-```julia
-condition(u,t,integrator) = 1-maximum(u)
+<pre><code class="julia">condition(u,t,integrator) = 1-maximum(u)
 
 function affect!(integrator,cpm)
     u = integrator.u
@@ -171,64 +149,51 @@ function affect!(integrator,cpm)
     CellDivision!(cpm, cellID-1)
     return nothing
 end
-```
-
-```
-affect! (generic function with 1 method)
-```
+</code></pre>
 
 This will instantiate the ContinuousCallback triggering cell division
 
-```julia
-ccb = ContinuousCallback(condition,integrator -> affect!(integrator, cpm));
-```
+<pre><code class="julia">ccb = ContinuousCallback(condition,integrator -> affect!(integrator, cpm));
+</code></pre>
 
 To pass multiple callbacks, we need to collect them into a set.
 
-```julia
-callbacks = CallbackSet(pcb, ccb);
-```
+<pre><code class="julia">callbacks = CallbackSet(pcb, ccb);
+</code></pre>
 
 Define the ODE model and solve
 
-```julia
-tspan = (0.0,20.0)
+<pre><code class="julia">tspan = (0.0,20.0)
 prob = ODEProblem(f,u0,tspan)
 sol = solve(prob, Tsit5(), callback=callbacks);
-```
+</code></pre>
 
 ## Visualization
 
 We can replicate the plots from the original example
 
-```julia
-using Plots, Printf, ColorSchemes
-```
+<pre><code class="julia">using Plots, Printf, ColorSchemes
+</code></pre>
 
 Plot the total cell count over time
 
-```julia
-plot(sol.t,map((x)->length(x),sol[:]),lw=3,
+<pre><code class="julia">plot(sol.t,map((x)->length(x),sol[:]),lw=3,
      ylabel="Number of Cells",xlabel="Time",legend=nothing)
-```
+</code></pre>
 
 ![](/assets/img/cellPopulation.png){: .width-50}
 
 Plot Protein X dynamics for a specific cell
 
-```julia
-ts = range(0, stop=20, length=100)
+<pre><code class="julia">ts = range(0, stop=20, length=100)
 plot(ts,map((x)->x[2],sol.(ts)),lw=3, ylabel="Amount of X in Cell 1",xlabel="Time",legend=nothing)
-```
+</code></pre>
 
 ![](/assets/img/cellDynamics.png){: .width-80}
 
-Finally, we can provide the code used to produce the animation we saw at the beginning. I've dropped the first few frames because the first cell takes a while to divide.
+Finally, we can provide the code used to produce the animation we saw at the beginning. I've dropped the first few frames because the first cell takes a while to divide. A link to all the code can be found [here](https://github.com/RobertGregg/CellularPotts.jl/blob/master/docs/src/ExampleGallery/BringingODEsToLife/BringingODEsToLife.jl)
 
-
-
-```julia
-proteinXConc = zeros(size(space))
+<pre><code class="julia">proteinXConc = zeros(size(space))
 
 anim = @animate for t in Iterators.drop(1:cpm.step.stepCounter,5*timeScale)
     currTime = @sprintf "Time: %.2f" t/timeScale
@@ -260,4 +225,4 @@ anim = @animate for t in Iterators.drop(1:cpm.step.stepCounter,5*timeScale)
 end
 
 gif(anim, "BringingODEsToLife.gif", fps = 30)
-```
+</code></pre>

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -24,6 +25,10 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="/assets/css/main.css">
+
+  <link rel="stylesheet" href="/assets/highlight/styles/atom-one-dark.min.css">
+  <script src="/assets/highlight/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
 
   <!-- Begin Jekyll SEO tag v2.8.0 -->
 <title>Problems in ODE Parameter Fitting | Robert Gregg</title>
@@ -132,61 +137,62 @@ G(t) = \frac{k \cdot m_0}{\beta-\tau} \left( e^{-\tau t} - e^{-\beta t} \right).
 
 <p>Using Julia, we can code the ODE model we can run an optimization routine to solve for the parameter values.</p>
 
-<div class="language-julia highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#Importing packages</span>
-	<span class="k">using</span> <span class="n">DifferentialEquations</span><span class="x">,</span> <span class="n">Random</span><span class="x">,</span> <span class="n">Plots</span> <span class="c">#Creating ODEs and Plotting</span>
-	<span class="k">using</span> <span class="n">DiffEqParamEstim</span><span class="x">,</span> <span class="n">Optim</span> <span class="c">#For finding best fit parameters</span>
+<pre><code class="julia">
+#Importing packages
+using DifferentialEquations, Random, Plots #Creating ODEs and Plotting
+using DiffEqParamEstim, Optim #For finding best fit parameters
 
-<span class="c">###############################################</span>
-<span class="c"># Define the ODE Model</span>
-<span class="c">###############################################</span>
-<span class="c">#Using the fact that m(t) = exp(-τ*t)</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="k">function</span><span class="x">(</span><span class="n">G</span><span class="x">,</span><span class="n">p</span><span class="x">,</span><span class="n">t</span><span class="x">)</span>
-        <span class="c">#Assign parameter values</span>
-        <span class="n">k</span><span class="x">,</span> <span class="n">β</span><span class="x">,</span> <span class="n">τ</span><span class="x">,</span> <span class="n">m0</span> <span class="o">=</span> <span class="n">p</span>
-        <span class="c">#Write the differential equation</span>
-        <span class="k">return</span> <span class="n">k</span><span class="o">*</span><span class="n">m0</span><span class="o">*</span><span class="n">exp</span><span class="x">(</span><span class="o">-</span><span class="n">τ</span><span class="o">*</span><span class="n">t</span><span class="x">)</span> <span class="o">-</span> <span class="n">β</span><span class="o">*</span><span class="n">G</span>
-    <span class="k">end</span>
+###############################################
+# Define the ODE Model
+###############################################
+#Using the fact that m(t) = exp(-τ*t)
+    f = function(G,p,t)
+        #Assign parameter values
+        k, β, τ, m0 = p
+        #Write the differential equation
+        return k*m0*exp(-τ*t) - β*G
+    end
 
-<span class="c">#Parameter values, Initial Conditions, Time (start, end)</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="x">[</span><span class="mf">2.0</span><span class="x">,</span> <span class="mf">0.8</span><span class="x">,</span> <span class="mf">0.2</span><span class="x">,</span> <span class="mf">5.0</span><span class="x">]</span> <span class="c">#true parameter values</span>
-    <span class="n">u0</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">tspan</span> <span class="o">=</span> <span class="x">(</span><span class="mf">0.0</span><span class="x">,</span><span class="mf">10.0</span><span class="x">)</span>
-<span class="c">#Contruct the ODE Problem</span>
-    <span class="n">prob</span> <span class="o">=</span> <span class="n">ODEProblem</span><span class="x">(</span><span class="n">f</span><span class="x">,</span><span class="n">u0</span><span class="x">,</span><span class="n">tspan</span><span class="x">,</span><span class="n">p</span><span class="x">)</span>
-<span class="c">#Solve the ODE problem and plot the solution (Tsit5 is a fancy ODE45)</span>
-    <span class="n">sol</span> <span class="o">=</span> <span class="n">solve</span><span class="x">(</span><span class="n">prob</span><span class="x">,</span><span class="n">Tsit5</span><span class="x">())</span>
-    <span class="n">plot</span><span class="x">(</span><span class="n">sol</span><span class="x">,</span><span class="n">title</span><span class="o">=</span><span class="s">"ODE Solution"</span><span class="x">,</span><span class="n">framestyle</span><span class="o">=:</span><span class="n">box</span><span class="x">,</span><span class="n">labels</span><span class="o">=:</span><span class="n">True</span><span class="x">)</span>
+#Parameter values, Initial Conditions, Time (start, end)
+    p = [2.0, 0.8, 0.2, 5.0] #true parameter values
+    u0 = 0.0
+    tspan = (0.0,10.0)
+#Contruct the ODE Problem
+    prob = ODEProblem(f,u0,tspan,p)
+#Solve the ODE problem and plot the solution (Tsit5 is a fancy ODE45)
+    sol = solve(prob,Tsit5())
+    plot(sol,title="ODE Solution",framestyle=:box,labels=:True)
 
-<span class="c">###############################################</span>
-<span class="c"># Generate synthetic data to fit</span>
-<span class="c">###############################################</span>
+###############################################
+# Generate synthetic data to fit
+###############################################
 
-<span class="c">#Set a seed for reproducibility (same stream of random numbers every time)</span>
-	<span class="n">Random</span><span class="o">.</span><span class="n">seed!</span><span class="x">(</span><span class="mi">0</span><span class="x">)</span>
-<span class="c">#Create a data set for optimization (adding random normal numbers)</span>
-	<span class="n">dataset</span> <span class="o">=</span> <span class="x">[(</span><span class="n">t</span><span class="x">,</span><span class="n">sol</span><span class="x">(</span><span class="n">t</span><span class="x">)</span><span class="o">+</span><span class="mf">0.2</span><span class="n">randn</span><span class="x">())</span> <span class="k">for</span> <span class="n">t</span> <span class="k">in</span> <span class="mi">0</span><span class="o">:</span><span class="mf">0.1</span><span class="o">:</span><span class="mi">10</span><span class="x">]</span>
-<span class="c">#Plot the data on top of the true solution</span>
-	<span class="n">scatter!</span><span class="x">(</span><span class="n">dataset</span><span class="x">,</span><span class="n">framestyle</span><span class="o">=:</span><span class="n">box</span><span class="x">,</span><span class="n">labels</span><span class="o">=</span><span class="s">"GFP Data"</span><span class="x">)</span>
+#Set a seed for reproducibility (same stream of random numbers every time)
+	Random.seed!(0)
+#Create a data set for optimization (adding random normal numbers)
+	dataset = [(t,sol(t)+0.2randn()) for t in 0:0.1:10]
+#Plot the data on top of the true solution
+	scatter!(dataset,framestyle=:box,labels="GFP Data")
 
-<span class="c">###############################################</span>
-<span class="c"># Create a cost function and optimize</span>
-<span class="c">###############################################</span>
+###############################################
+# Create a cost function and optimize
+###############################################
 
-<span class="c">#Cost function</span>
-	<span class="n">dataTime</span> <span class="o">=</span> <span class="x">[</span><span class="n">d</span><span class="x">[</span><span class="mi">1</span><span class="x">]</span> <span class="k">for</span> <span class="n">d</span> <span class="k">in</span> <span class="n">dataset</span><span class="x">]</span> <span class="c">#Collect the time points</span>
-	<span class="n">dataValues</span> <span class="o">=</span> <span class="x">[</span><span class="n">d</span><span class="x">[</span><span class="mi">2</span><span class="x">]</span> <span class="k">for</span> <span class="n">d</span> <span class="k">in</span> <span class="n">dataset</span><span class="x">]</span> <span class="c">#Collect the GFP values</span>
-<span class="c">#The cost function needs a few inputs including the ODE problem, ODE solver,</span>
-<span class="c">#and L2 error (i.e. sum of squared error)</span>
-	<span class="n">cost_function</span> <span class="o">=</span> <span class="n">build_loss_objective</span><span class="x">(</span><span class="n">prob</span><span class="x">,</span><span class="n">Tsit5</span><span class="x">(),</span>
-                  <span class="n">L2Loss</span><span class="x">(</span><span class="n">dataTime</span><span class="x">,</span><span class="n">dataValues</span><span class="x">),</span> <span class="n">maxiters</span><span class="o">=</span><span class="mi">10000</span><span class="x">,</span><span class="n">verbose</span><span class="o">=</span><span class="nb">false</span><span class="x">)</span>
-<span class="c">#Run the optimizer</span>
-	<span class="n">initialGuess</span> <span class="o">=</span> <span class="n">ones</span><span class="x">(</span><span class="mi">4</span><span class="x">)</span> <span class="c">#all parameters set to 1</span>
-	<span class="n">result</span> <span class="o">=</span> <span class="n">optimize</span><span class="x">(</span><span class="n">cost_function</span><span class="x">,</span> <span class="n">initialGuess</span><span class="x">)</span> 
-<span class="c">#Plot the best parameters found</span>
-	<span class="n">probOpt</span> <span class="o">=</span> <span class="n">remake</span><span class="x">(</span><span class="n">prob</span><span class="x">,</span><span class="n">p</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">minimizer</span><span class="x">)</span>
-	<span class="n">solOpt</span> <span class="o">=</span> <span class="n">solve</span><span class="x">(</span><span class="n">probOpt</span><span class="x">,</span><span class="n">Tsit5</span><span class="x">())</span>
-	<span class="n">plot!</span><span class="x">(</span><span class="n">solOpt</span><span class="x">,</span><span class="n">labels</span><span class="o">=:</span><span class="n">Optimized</span><span class="x">,</span><span class="n">linestyle</span> <span class="o">=</span> <span class="o">:</span><span class="n">dash</span><span class="x">)</span>
-</code></pre></div></div>
+#Cost function
+	dataTime = [d[1] for d in dataset] #Collect the time points
+	dataValues = [d[2] for d in dataset] #Collect the GFP values
+#The cost function needs a few inputs including the ODE problem, ODE solver,
+#and L2 error (i.e. sum of squared error)
+	cost_function = build_loss_objective(prob,Tsit5(),
+                  L2Loss(dataTime,dataValues), maxiters=10000,verbose=false)
+#Run the optimizer
+	initialGuess = ones(4) #all parameters set to 1
+	result = optimize(cost_function, initialGuess) 
+#Plot the best parameters found
+	probOpt = remake(prob,p=result.minimizer)
+	solOpt = solve(probOpt,Tsit5())
+	plot!(solOpt,labels=:Optimized,linestyle = :dash)
+</code></pre>
 
 <p><img src="/assets/img/Figure_GFP_fit.svg" alt="Figure_GFP_fit" class="width-80" /></p>
 
