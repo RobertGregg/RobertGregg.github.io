@@ -14,7 +14,7 @@ In this blog post, we'll demonstrate how to combine two modeling paradigms to si
 
 In the animation above, we see relatively circular blobs that represent cells adhering to one another. The color of each cell relates to the concentration of a theoretical protein X that controls cellular division. As we move forward in time, the concentration of protein X increases to a maximum value of one which triggers the cell to divide into two daughter cells. Protein X seems to be randomly distribute between the two new cells after division. The two daughter cells also seem to quickly grow to match the size of the other cells. 
 
-Let's walk through the code to develop this simulation. There are two characteristics that need to modeled in this simulation, the first being the geometry of each cell and the second being the dynamics of the intracellular proteins. Let's walk through the Julia code used to simulate these models.
+Let's walk through the code to develop this simulation. There are two characteristics that need to modeled in this simulation, the first being the geometry of each cell and the second being the dynamics of the intracellular proteins.
 
 We begin by loading in both `CellularPotts.jl` and `DifferentialEquations.jl` which model the geometry and dynamics respectively.
 
@@ -23,11 +23,11 @@ We begin by loading in both `CellularPotts.jl` and `DifferentialEquations.jl` wh
 
 ## Cellular Potts Modeling
 
-A Cellular Potts Model (CPM) works by defining an array of integer IDs that represent the space where cells are located. Each value in the array corresponds to different objects in the simulation, for example, a value of 0 could represent a point in space with no cell present and a value of 2 could belong to the a second cell introduced into the simulation.
+A Cellular Potts Model (CPM) works by defining an array of integer IDs that represent the space where cells are located. Each value in the array corresponds to different objects in the simulation, for example, a value of 0 could represent a point in space with no cell present and a value of 2 could belong to the second cell introduced into the simulation.
 
 ![](/assets/img/cellPottsEx.png){: .width-80}
 
-As the CPM steps forward in time, values in the grid and replaced with neighboring value. Penalties (like a cell volume constraint) are added to ensure the simulation mimic desired cell behaviors. 
+As the CPM steps forward in time, values in the grid and replaced with a neighboring value. Penalties (like a cell volume constraint) are added to ensure the simulation mimics desired cell behaviors. 
 
 Let's use `CellularPotts.jl`  to create a new model which requires:
 
@@ -63,7 +63,7 @@ initialCellState = addcellproperty(initialCellState, :positions, positions)
 
 Here we define one cell type (Epithelial) which has a desired area of 200 units and we only want 1 to start. 
 <br><br>
-Each row in the table `CellTable()` generates represents a cell and each column lists a property given to that cell. Other information, like the column's type, is also provided. 
+Each row in the table `CellTable()` represents a cell and each column lists a property given to that cell. Other information, like the column's type, is also provided. 
 <br><br>
 The first row will always show properties for "Medium", the name given to grid locations without a cell type. Most values related to Medium are  either default or missing altogether. Here we see our one epithelial cell has a desired volume of 200 and perimeter of 168 which is the minimal perimeter penalty calculated from the desired volume. 
 <br><br>
@@ -93,7 +93,7 @@ Temperature: 20.0
 Steps: 0
 </code></pre>
 
-## Differential Equation modeling
+## Connecting Cellular Potts and Differential Equations
 
 This simulation actually extends [an example](https://diffeq.sciml.ai/latest/features/callback_functions/#Example-3:-Growing-Cell-Population) from the `DifferentialEquations.jl` documentation describing a growing cell population, so much of the code has been taken from this example. 
 
@@ -117,6 +117,8 @@ This timeScale variable below controls how often the callback is triggered. Larg
 <pre><code class="julia">timeScale = 100
 pcb = PeriodicCallback(integrator -> cpmUpdate!(integrator, cpm), 1/timeScale);
 </code></pre>
+
+## Differential Equation modeling
 
 The ODE functions are taken directly from the DifferentialEquations example. Each cell is given the following differential equation
 

@@ -5,7 +5,6 @@
     <nav>
       <ul>
         {% case current[0] %}
-
         <!-- home -->
         {% when none %}
         <li class="current">Home</li>
@@ -52,6 +51,11 @@
             <li class="btn-nav">Tags</li>
           </a>
         {% endif %}
+        {% if site.CV %}
+          <a href="{{ '/CV' | relative_url }}">
+            <li class="btn-nav">CV</li>
+          </a>
+        {% endif %}
 
         <!-- presentations -->
         {% when 'presentations' %}
@@ -70,6 +74,11 @@
           </a>
           <a href="{{ '/tags' | relative_url }}">
             <li class="btn-nav">Tags</li>
+          </a>
+        {% endif %}
+        {% if site.CV %}
+          <a href="{{ '/CV' | relative_url }}">
+            <li class="btn-nav">CV</li>
           </a>
         {% endif %}
 
@@ -92,6 +101,11 @@
         <a href="{{ '/tags' | relative_url }}">
           <li class="btn-nav">Tags</li>
         </a>
+        {% if site.CV %}
+          <a href="{{ '/CV' | relative_url }}">
+            <li class="btn-nav">CV</li>
+          </a>
+        {% endif %}
 
         <!-- tags -->
         {% when 'tags' %}
@@ -108,12 +122,32 @@
             <li class="btn-nav">Presentations</li>
           </a>
         {% endif %}
+        {% if site.blog %}
           <a href="{{ '/blog' | relative_url }}">
             <li class="btn-nav">Blog</li>
           </a>
           <li class="current">Tags</li>
-        {% else %}
+        {% endif %}
 
+        <!-- CV -->
+        {% when 'CV' %}
+        <a href="{{ '/CV' | relative_url }}">
+          <li class="btn-nav">Home</li>
+        </a>
+        <li class="current">Publications</li>
+        {% if site.presentations %}
+          <a href="{{ '/presentations' | relative_url }}">
+            <li class="btn-nav">Presentations</li>
+          </a>
+        {% endif %}
+        {% if site.blog %}
+          <a href="{{ '/blog' | relative_url }}">
+            <li class="btn-nav">Blog</li>
+          </a>
+          <a href="{{ '/tags' | relative_url }}">
+            <li class="btn-nav">Tags</li>
+          </a>
+        {% else %}
         <!-- others -->
         <a href="{{ '/' | relative_url }}">
           <li class="btn-nav">Home</li>
@@ -134,6 +168,11 @@
           </a>
           <a href="{{ '/tags' | relative_url }}">
             <li class="btn-nav">Tags</li>
+          </a>
+        {% endif %}
+        {% if site.CV %}
+          <a href="{{ '/CV' | relative_url }}">
+            <li class="btn-nav">CV</li>
           </a>
         {% endif %}
         {% endcase %}

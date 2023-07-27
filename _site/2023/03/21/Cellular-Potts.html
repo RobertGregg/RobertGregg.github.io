@@ -38,6 +38,8 @@
 <meta property="og:locale" content="en_GB" />
 <meta name="description" content="In this blog post, we’ll demonstrate how to combine two modeling paradigms to simulate a population of cells dividing." />
 <meta property="og:description" content="In this blog post, we’ll demonstrate how to combine two modeling paradigms to simulate a population of cells dividing." />
+<link rel="canonical" href="http://localhost:4000/2023/03/21/Cellular-Potts.html" />
+<meta property="og:url" content="http://localhost:4000/2023/03/21/Cellular-Potts.html" />
 <meta property="og:site_name" content="Robert Gregg" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2023-03-21T00:00:00-07:00" />
@@ -46,7 +48,7 @@
 <meta name="twitter:site" content="@RobertWGregg" />
 <meta name="twitter:creator" content="@Robert Gregg" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Robert Gregg"},"dateModified":"2023-03-21T00:00:00-07:00","datePublished":"2023-03-21T00:00:00-07:00","description":"In this blog post, we’ll demonstrate how to combine two modeling paradigms to simulate a population of cells dividing.","headline":"Adding ODEs to CellularPotts.jl","mainEntityOfPage":{"@type":"WebPage","@id":"/2023/03/21/Cellular-Potts.html"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/assets/img/headshot.jpg"},"name":"Robert Gregg"},"url":"/2023/03/21/Cellular-Potts.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Robert Gregg"},"dateModified":"2023-03-21T00:00:00-07:00","datePublished":"2023-03-21T00:00:00-07:00","description":"In this blog post, we’ll demonstrate how to combine two modeling paradigms to simulate a population of cells dividing.","headline":"Adding ODEs to CellularPotts.jl","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2023/03/21/Cellular-Potts.html"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/assets/img/headshot.jpg"},"name":"Robert Gregg"},"url":"http://localhost:4000/2023/03/21/Cellular-Potts.html"}</script>
 <!-- End Jekyll SEO tag -->
 
 </head>
@@ -61,6 +63,7 @@
     <nav>
       <ul>
         
+
         <!-- others -->
         <a href="/">
           <li class="btn-nav">Home</li>
@@ -80,9 +83,6 @@
           </a>
         
         
-        <a href="/CV">
-          <li class="btn-nav">CV</li>
-        </a>
       </ul>
     </nav>
   </header>
@@ -102,7 +102,7 @@
 
 <p>In the animation above, we see relatively circular blobs that represent cells adhering to one another. The color of each cell relates to the concentration of a theoretical protein X that controls cellular division. As we move forward in time, the concentration of protein X increases to a maximum value of one which triggers the cell to divide into two daughter cells. Protein X seems to be randomly distribute between the two new cells after division. The two daughter cells also seem to quickly grow to match the size of the other cells.</p>
 
-<p>Let’s walk through the code to develop this simulation. There are two characteristics that need to modeled in this simulation, the first being the geometry of each cell and the second being the dynamics of the intracellular proteins. Let’s walk through the Julia code used to simulate these models.</p>
+<p>Let’s walk through the code to develop this simulation. There are two characteristics that need to modeled in this simulation, the first being the geometry of each cell and the second being the dynamics of the intracellular proteins.</p>
 
 <p>We begin by loading in both <code class="language-plaintext highlighter-rouge">CellularPotts.jl</code> and <code class="language-plaintext highlighter-rouge">DifferentialEquations.jl</code> which model the geometry and dynamics respectively.</p>
 
@@ -111,11 +111,11 @@
 
 <h2 id="cellular-potts-modeling">Cellular Potts Modeling</h2>
 
-<p>A Cellular Potts Model (CPM) works by defining an array of integer IDs that represent the space where cells are located. Each value in the array corresponds to different objects in the simulation, for example, a value of 0 could represent a point in space with no cell present and a value of 2 could belong to the a second cell introduced into the simulation.</p>
+<p>A Cellular Potts Model (CPM) works by defining an array of integer IDs that represent the space where cells are located. Each value in the array corresponds to different objects in the simulation, for example, a value of 0 could represent a point in space with no cell present and a value of 2 could belong to the second cell introduced into the simulation.</p>
 
 <p><img src="/assets/img/cellPottsEx.png" alt="" class="width-80" /></p>
 
-<p>As the CPM steps forward in time, values in the grid and replaced with neighboring value. Penalties (like a cell volume constraint) are added to ensure the simulation mimic desired cell behaviors.</p>
+<p>As the CPM steps forward in time, values in the grid and replaced with a neighboring value. Penalties (like a cell volume constraint) are added to ensure the simulation mimics desired cell behaviors.</p>
 
 <p>Let’s use <code class="language-plaintext highlighter-rouge">CellularPotts.jl</code>  to create a new model which requires:</p>
 
@@ -153,7 +153,7 @@ initialCellState = addcellproperty(initialCellState, :positions, positions)
 
 <p>Here we define one cell type (Epithelial) which has a desired area of 200 units and we only want 1 to start. 
 <br /><br />
-Each row in the table <code class="language-plaintext highlighter-rouge">CellTable()</code> generates represents a cell and each column lists a property given to that cell. Other information, like the column’s type, is also provided. 
+Each row in the table <code class="language-plaintext highlighter-rouge">CellTable()</code> represents a cell and each column lists a property given to that cell. Other information, like the column’s type, is also provided. 
 <br /><br />
 The first row will always show properties for “Medium”, the name given to grid locations without a cell type. Most values related to Medium are  either default or missing altogether. Here we see our one epithelial cell has a desired volume of 200 and perimeter of 168 which is the minimal perimeter penalty calculated from the desired volume. 
 <br /><br />
@@ -183,7 +183,7 @@ Temperature: 20.0
 Steps: 0
 </code></pre>
 
-<h2 id="differential-equation-modeling">Differential Equation modeling</h2>
+<h2 id="connecting-cellular-potts-and-differential-equations">Connecting Cellular Potts and Differential Equations</h2>
 
 <p>This simulation actually extends <a href="https://diffeq.sciml.ai/latest/features/callback_functions/#Example-3:-Growing-Cell-Population">an example</a> from the <code class="language-plaintext highlighter-rouge">DifferentialEquations.jl</code> documentation describing a growing cell population, so much of the code has been taken from this example.</p>
 
@@ -207,6 +207,8 @@ end
 <pre><code class="julia">timeScale = 100
 pcb = PeriodicCallback(integrator -&gt; cpmUpdate!(integrator, cpm), 1/timeScale);
 </code></pre>
+
+<h2 id="differential-equation-modeling">Differential Equation modeling</h2>
 
 <p>The ODE functions are taken directly from the DifferentialEquations example. Each cell is given the following differential equation</p>
 
