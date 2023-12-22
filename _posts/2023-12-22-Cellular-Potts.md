@@ -4,7 +4,7 @@ title: Adding ODEs to CellularPotts.jl
 subtitle : Visualizing Cell Division
 tags: [julia, cell potts]
 author: Robert Gregg
-date: 2023-03-21
+date: 2023-12-22
 comments : True
 ---
 
@@ -12,11 +12,11 @@ In this blog post, we'll demonstrate how to combine two modeling paradigms to si
 
 ![BringingODEsToLife](/assets/img/BringingODEsToLife.gif){: .width-80}
 
-In the animation above, we see relatively circular blobs that represent cells adhering to one another. The color of each cell relates to the concentration of a theoretical protein X that controls cellular division. As we move forward in time, the concentration of protein X increases to a maximum value of one which triggers the cell to divide into two daughter cells. Protein X seems to be randomly distribute between the two new cells after division. The two daughter cells also seem to quickly grow to match the size of the other cells. 
+In the animation above, we see relatively circular blobs that represent cells adhering to one another. The color of each cell relates to the concentration of a theoretical protein X that controls cellular division. As we move forward in time, the concentration of protein X increases to a maximum value of one which triggers the cell to divide into two daughter cells. Protein X randomly distributes between the two new cells after division and two daughter cells also quickly grow to match the size of the other cells. 
 
 Let's walk through the code to develop this simulation. There are two characteristics that need to modeled in this simulation, the first being the geometry of each cell and the second being the dynamics of the intracellular proteins.
 
-We begin by loading in both `CellularPotts.jl` and `DifferentialEquations.jl` which model the geometry and dynamics respectively.
+We begin by loading in both [CellularPotts.jl](https://github.com/RobertGregg/CellularPotts.jl) and [DifferentialEquations.jl](https://docs.sciml.ai/DiffEqDocs/stable/) which model the geometry and dynamics respectively.
 
 <pre><code class="julia">using CellularPotts, DifferentialEquations
 </code></pre>
@@ -27,7 +27,7 @@ A Cellular Potts Model (CPM) works by defining an array of integer IDs that repr
 
 ![](/assets/img/cellPottsEx.png){: .width-80}
 
-As the CPM steps forward in time, values in the grid and replaced with a neighboring value. Penalties (like a cell volume constraint) are added to ensure the simulation mimics desired cell behaviors. 
+As the CPM steps forward in time, values in the grid are replaced with neighboring values. Penalties (like a cell volume constraint) are added to ensure the simulation mimics desired cell behaviors. 
 
 Let's use `CellularPotts.jl`  to create a new model which requires:
 
@@ -38,18 +38,12 @@ Let's use `CellularPotts.jl`  to create a new model which requires:
 The space we will use is a 200×200 grid that defaults to periodic boundary conditions
 
 <pre><code class="julia">space = CellSpace(200,200)
-200×200 Periodic 8-Neighbor CellSpace{2,Int64}
+200×200 Periodic 4-Neighbor CellSpace{Int64,2}
 </code></pre>
 
 Next we need to initialize what cells we want in the model.
 
-<pre><code class="julia">initialCellState = CellTable(
-    [:Epithelial],
-    [200],
-    [1])
-
-positions = [size(space) .÷ 2]
-initialCellState = addcellproperty(initialCellState, :positions, positions)
+<pre><code class="julia">initialCellState = CellState(:Epithelial, 200, 1, positions = size(space) .÷ 2)
 </code></pre>
 
 <pre><code class="julia">┌────────────┬─────────┬─────────┬─────────┬────────────────┬────────────┬───────────────────┬─────────────────────┐
@@ -120,7 +114,7 @@ pcb = PeriodicCallback(integrator -> cpmUpdate!(integrator, cpm), 1/timeScale);
 
 ## Differential Equation modeling
 
-The ODE functions are taken directly from the DifferentialEquations example. Each cell is given the following differential equation
+The ODE functions are taken directly from the DifferentialEquations example. Each cell is given the following differential equation which models exponential increase in protein X concentration.
 
 $$
 \frac{\mathrm{d} X}{\mathrm{d} t} = \alpha X
