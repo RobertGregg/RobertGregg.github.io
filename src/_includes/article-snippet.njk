@@ -1,0 +1,11 @@
+{# loop variable needs to be paper #}
+<li>
+    <article class="snippet">
+        <!-- <img src="{{ post.data.image }}" alt="{{ post.data.imageAlt }}" class="snippet__image"> -->
+        <img src="/assets/images/{{ paper.image }}" alt="" class="snippet__image">
+        <h3 class="snippet__title"><a href="{{ paper.doi }}" target="_blank">{{ paper.title }}</a></h3>
+        <p class="snippet__meta"><span>{{ paper.author }}</span></p>
+        <p class="snippet__body">{{ paper.journal }} vol {{ paper.volume }} pp {{ paper.pages }} {{ paper.year }}</p>
+        <a href="{{ paper.doi }}" target="_blank" class="btn btn--primary">DOI Link</a>
+    </article>
+</li>

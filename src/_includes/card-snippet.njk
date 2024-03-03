@@ -1,0 +1,9 @@
+{# loop variable needs to be item #}
+<article class="information [ card ]">
+    <a class="card__link" href="{{ item.url }}">
+        <span class="tag">{{ item.data.date | postDate }}</span>
+        <h2 class="title">{{ item.data.title }}</h2>
+        <p class="info">{{ item.data.subtitle }}</p>
+        <img src="{{ item.data.image }}" alt="{{ item.data.imageAlt }}" class="snippet__image">
+    </a>
+</article>
