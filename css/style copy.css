@@ -1,0 +1,186 @@
+
+:root {
+  --dark-color: #24252a;
+  --medium-color: #1d4472;
+  --light-color: #f4f4fb;
+  --accent-color: #2893da;
+}
+
+/* ---------------------------------------------------------------- */
+/* Modern CSS Reset */
+/* https://piccalil.li/blog/a-more-modern-css-reset/ */
+/* ---------------------------------------------------------------- */
+
+
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Prevent font size inflation */
+html {
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+/* Remove default margin in favour of better control in authored CSS */
+body, h1, h2, h3, h4, p,
+figure, blockquote, dl, dd {
+  margin-block-end: 0;
+}
+
+/* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+}
+
+/* Set core body defaults */
+body {
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* Set shorter line heights on headings and interactive elements */
+h1, h2, h3, h4,
+button, input, label {
+  line-height: 1.1;
+}
+
+/* Balance text wrapping on headings */
+h1, h2,
+h3, h4 {
+  text-wrap: balance;
+}
+
+/* A elements that don't have a class get default styles */
+a:not([class]) {
+  text-decoration-skip-ink: auto;
+  color: currentColor;
+}
+
+/* Make images easier to work with */
+img,
+picture {
+  max-width: 100%;
+  display: block;
+}
+
+/* Inherit fonts for inputs and buttons */
+input, button,
+textarea, select {
+  font: inherit;
+}
+
+/* Make sure textareas without a rows attribute are not tiny */
+textarea:not([rows]) {
+  min-height: 10em;
+}
+
+/* Anything that has been anchored to should have extra scroll margin */
+:target {
+  scroll-margin-block: 5ex;
+}
+
+
+/* ---------------------------------------------------------------- */
+/* Naviagation Bar */
+/* ---------------------------------------------------------------- */
+
+
+.header {
+  display: flex;
+  background-color: var(--dark-color);
+  align-items: center;
+  justify-content: space-between;
+  min-height: 60px;
+  padding: 0px 30px;
+  margin: 0 auto;
+}
+
+.logo {
+  color: var(--light-color);
+  font-size: 30px;
+  transition: all 0.4s;
+  position: relative;
+  text-decoration: none;
+}
+
+.logo:hover {
+  color: var(--accent-color);
+}
+
+.active {
+  color: var(--light-color);
+}
+
+.active::after {
+  content: '';
+  height: 2px;
+  width: 100%;
+  background-color: var(--accent-color);
+  position: absolute;
+  left: 0;
+  bottom: -8px;
+  transition: all 0.2s;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.nav__list {
+  display: flex;
+  column-gap: 40px;
+  list-style: none;
+}
+
+.nav__list a {
+  color: var(--light-color);
+  font-size: 20px;
+  transition: all 0.2s;
+  position: relative;
+  text-decoration: none;
+}
+
+.nav__list a:hover{
+  color: var(--accent-color);
+}
+
+
+
+/* ---------------------------------------------------------------- */
+/* Ensure the footer stays on the bottom */
+/* ---------------------------------------------------------------- */
+
+
+main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+footer {
+  margin-top: auto;
+  text-align: center;
+}
+
+
+
+.social {
+  display: flex;
+  column-gap: 20px;
+  list-style: none;
+}
+
+.social-link {
+  font-size: 40px;
+  color: var(--medium-color);
+  width: 40px;
+  height: 40px;
+}
+
+.social-link:hover {
+  color: var(--accent-color);
+}
