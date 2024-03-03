@@ -1,0 +1,30 @@
+<header class="page-header">
+
+    <div class="container">
+        <div class="page-header__content">
+            <div>
+                <a href="/index" class="logo">Robert Gregg</a>
+            </div>
+
+            <nav>
+                <ul role="list" class="nav-list flex-group">
+                    {% for link in collections.sitepage %}
+                    <li>
+                        {% if page.url==link.url %}
+                        <div class="nav-item">
+                            <i class="{{ link.data.icon }} active"></i><a class="nav-link active" href="{{ link.url }}"> {{ link.data.title }}</a>
+                        </div>
+                        {% else  %}
+                        <div class="nav-item">
+                            <i class="{{ link.data.icon }}"></i><a class="nav-link" href="{{ link.url }}"> {{ link.data.title }}</a>
+                        </div>
+                        {% endif %}
+                    </li>
+                    {%- endfor %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    
+</header>
