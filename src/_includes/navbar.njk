@@ -8,7 +8,7 @@
 
             <nav>
                 <ul role="list" class="nav-list flex-group">
-                    {% for link in collections.sitepage %}
+                    {% for link in collections.sitepage | sort(attribute='data.order') %}
                     <li>
                         {% if page.url==link.url %}
                         <div class="nav-item">
