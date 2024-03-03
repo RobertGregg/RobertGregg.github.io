@@ -6,7 +6,7 @@
   "scripts": {
     "start": "eleventy --serve",
     "build": "eleventy",
-    "build:prod": "npm run ELEVENTY_ENV=production eleventy"
+    "build:prod": "npm run eleventy"
   },
   "keywords": [],
   "author": "",
