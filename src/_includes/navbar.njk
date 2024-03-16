@@ -11,7 +11,7 @@
 
             <nav>
                 <ul role="list" class="nav-list flex-group">
-                    <li class="hamburger">hamburger</li>
+                    {# <li class="hamburger">hamburger</li> #}
                     {% for link in collections.sitepage | sort(attribute='data.order') %}
                     <li>
                         {% if page.url==link.url %}
