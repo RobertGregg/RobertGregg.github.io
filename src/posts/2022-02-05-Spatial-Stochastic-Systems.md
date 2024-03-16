@@ -122,10 +122,10 @@ sol = solve(jumpProb, SSAStepper(), saveat=0.1)
 The most confusing part is probably the generation of the mass action jump and is best explained through example. The reactant stoichiometry matrix records which species are reactants for every reaction. Here we have 2 species and 4 reactions, meaning `substoichmat(LV_model)` will give the following 2×4 matrix:
 
 $$
-\begin{matrix}
-1 & 1 & 1 & 0 \\\\
-0 & 1 & 1 & 1 \\\\
-\end{matrix}
+\begin{bmatrix}
+1 & 1 & 1 & 0 \\
+0 & 1 & 1 & 1 \\
+\end{bmatrix}
 $$
 
 The second column (for example) corresponds to the reaction: `x + y --> y`. Both rows have a one because both x and y are reactants. This needs to be converted into a vector of `Pairs` where the first number corresponds to the species and the second number to the value in the matrix. For the matrix above we would get:

@@ -1,3 +1,6 @@
+{# Hamburger menu for mobile #}
+{# https://stackoverflow.com/questions/50156069/how-can-i-make-my-existing-responsive-navigation-bar-into-a-hamburger-menu-for-s #}
+
 <header class="page-header">
 
     <div class="container">
@@ -8,15 +11,16 @@
 
             <nav>
                 <ul role="list" class="nav-list flex-group">
+                    <li class="hamburger">hamburger</li>
                     {% for link in collections.sitepage | sort(attribute='data.order') %}
                     <li>
                         {% if page.url==link.url %}
                         <div class="nav-item">
-                            <i class="{{ link.data.icon }} active"></i><a class="nav-link active" href="{{ link.url }}"> {{ link.data.title }}</a>
+                            <a class="nav-link active" href="{{ link.url }}"> <i class="{{ link.data.icon }} active"></i> {{ link.data.title }}</a>
                         </div>
                         {% else  %}
                         <div class="nav-item">
-                            <i class="{{ link.data.icon }}"></i><a class="nav-link" href="{{ link.url }}"> {{ link.data.title }}</a>
+                            <a class="nav-link" href="{{ link.url }}"> <i class="{{ link.data.icon }}"></i> {{ link.data.title }}</a>
                         </div>
                         {% endif %}
                     </li>

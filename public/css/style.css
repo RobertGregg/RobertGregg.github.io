@@ -240,7 +240,28 @@ main {
   color: var(--clr-primary-400);
 }
 
+/* Hamburger menu for mobile */
+@media only screen and (min-width: 701px) {
+  /* hide the hamburger */
+  .hamburger {
+    display: none;
+  }
+  /* show all the nav-buttons */
+  .nav-button {
+    display: flex;
+  }
+}
 
+@media only screen and (max-width: 700px) {
+  /* show everything with the hamburger class */
+  .hamburger {
+    display: flex;
+  }
+  /* hide all the nav-buttons */
+  .nav-item {
+    display: none;
+  }
+}
 
 /* //////////////////////
   Footer

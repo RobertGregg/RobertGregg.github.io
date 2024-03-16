@@ -1,19 +1,22 @@
 // Code Highlighting Plugin
 const syntaxHighlight = require("@11ty/eleventy-plugin-syntaxhighlight");
 
-// Render Math
-// eleventy-plugin-mathjax was duplicating equations?
-// @sunt-programator/eleventy-plugin-mathjax
-const mathjaxPlugin = require("eleventy-plugin-mathjax");
-
 // Formatting Dates and fixing off by one error
 const {DateTime} = require("luxon")
 
+// eleventy-plugin-mathjax was duplicating equations?
+// @sunt-programator/eleventy-plugin-mathjax
+// const mathjaxPlugin = require("eleventy-plugin-mathjax");
+
+const markdownIt = require("markdown-it");
+// Render Math
+const mathjax3 = require("markdown-it-mathjax3");
 // Set class attibutes in markdown
-const markdownIt = require('markdown-it')
 const markdownItAttrs = require('markdown-it-attrs')
-const markdownItOptions = {html: true, breaks: true, linkify: true}
-const markdownLib = markdownIt(markdownItOptions).use(markdownItAttrs)
+const mdOptions = {html: true,breaks: true,linkify: true};
+const markdownLib = markdownIt(mdOptions).use(mathjax3).use(markdownItAttrs);
+
+
 
 module.exports = function (eleventyConfig) {
 
@@ -28,7 +31,7 @@ module.exports = function (eleventyConfig) {
     eleventyConfig.addPlugin(syntaxHighlight);
 
     // Use math plugin
-    eleventyConfig.addPlugin(mathjaxPlugin);
+    // eleventyConfig.addPlugin(mathjaxPlugin);
 
     // Use Javascript to format dates better
     eleventyConfig.addFilter("postDate", (dateObj) => {
