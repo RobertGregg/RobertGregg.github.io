@@ -15,9 +15,9 @@ $$
 x = A\setminus b
 $$
 
-where each column in $A$ is a predictor, $b$ is outcome, and $x$ is a vector of coefficients for the regression. There's some nuance to this. To perform a regression with an intercept term you need to append a column of 1's to the $A$ matrix. Additionally, a number of algorithms are available to perform this matrix inverse, but many conventional softwares default to a method called $QR$ decomposition. More interestingly, some software packages are clever and allow you to save this decomposition to be reused if $b$ changes.
+where each column in $A$ is a predictor, $b$ is the outcome, and $x$ is a vector of coefficients for the regression. There's some nuance to this. To perform a regression with an intercept term you need to append a column of 1's to the $A$ matrix. Additionally, a number of algorithms are available to perform this matrix inverse, but many conventional softwares default to a method called $QR$ decomposition. More interestingly, some software packages are clever and allow you to save this decomposition to be reused if $b$ changes.
 
-Causal algorithms will change $b$ and $A$ so it would appear that saving the $QR$ decomposition would be pointless. However, $A$ doesn't change "too much". We only ever takes subsets of $A$ as the causal algorithm iterators over multiple predictors. If we compute the decomposition for the entire $A$ matrix, can we modify this decomposition slightly to solve a subsystem? If you guessed yes you're correct, otherwise this would be a pretty boring blog-post. :wink:
+Causal algorithms will change $b$ and $A$ so it would appear that saving the $QR$ decomposition would be pointless. However, $A$ doesn't change "too much". We only ever takes subsets of $A$ as the causal algorithm iterators over multiple predictors. If we compute the decomposition for the entire $A$ matrix, can we modify this decomposition slightly to solve a subsystem? If you guessed yes you're correct, otherwise this would be a pretty boring blog-post.😉
 
 # Q-less QR Decomposition
 
@@ -27,9 +27,9 @@ $$
 x = R^{-1} Q^\intercal b
 $$
 
-You can see once we have the decomposition, then substituting different outcome variables (i.e., different $b$ vectors) becomes trivial. However, as mentioned before, $Q$ and $R$ change whenever $A$ changes, so how can we use the above equation? The answer comes in two parts: eliminating $Q$ from the equation and Givens Rotations. 
+You can see once we have the decomposition, then substituting different outcome variables (i.e., different $b$ vectors) becomes trivial. However, as mentioned before, $Q$ and $R$ change whenever $A$ changes, so how can we use the above equation? The answer comes in two parts: eliminating $Q$ and Givens Rotations. 
 
-To eliminate $Q$ from the equation we can make use of the [Normal Equation](https://mathworld.wolfram.com/NormalEquation.html). Through some clever substitutions we can arrive at a solution for $x$ that does not depend on $Q$.
+To eliminate $Q$ from the solution we can make use of the [Normal Equation](https://mathworld.wolfram.com/NormalEquation.html) form. Through some clever substitutions we can arrive at a solution for $x$ that does not depend on $Q$.
 
 $$
 \begin{align*}
@@ -56,7 +56,7 @@ Note that we effectively have to solve two systems of equations, one for $R^\int
 
 # Givens Rotations
 
-When you take a subset of columns from $A$, you have to then remove those same columns from $R$. This will more than likely cause $R$ to no longer be an upper triangular matrix, defeating the purpose of saving it in the first place. Our saving grace here is a technique called [Givens Rotations](https://en.wikipedia.org/wiki/Givens_rotation). These rotations are represented by orthogonal  matrices that rotate vectors in a given plane counterclockwise specified by a desired angle. This additional matrices can be "absorbed" into $Q$ because they are orthogonal and they have the interesting property that they can zero out any desired value in a matrix. 
+When you take a subset of columns from $A$, you have to then remove those same columns from $R$. This will more than likely cause $R$ to no longer be an upper triangular matrix, defeating the purpose of saving it in the first place. Our saving grace here is a technique called [Givens Rotations](https://en.wikipedia.org/wiki/Givens_rotation). These rotations are represented by orthogonal  matrices that rotate vectors in a given plane counterclockwise specified by a desired angle. These additional matrices can be "absorbed" into $Q$ because they are orthogonal and, more importantly, they have the property of "zeroing out" any desired value in a matrix. 
 
 This might be best demonstrated with an example. Take the following matrix $A$ and its QR decomposition:
 
@@ -99,13 +99,20 @@ $R_{sub}$ needs to triangular, however, this is not the case after removing the 
 $$
 G = \begin{bmatrix}
 1 & 0 & 0\\
+0 & cos(\theta) & sin(\theta)\\
+0 & -sin(\theta) & cos(\theta)
+\end{bmatrix} =
+\begin{bmatrix}
+1 & 0 & 0\\
 0 & 0 & -1\\
 0 & 1 & 0
 \end{bmatrix}
 $$
 
+Here $\theta=-\frac{\pi}{2}$ but in practice we never need to explicitly calculate its value.
+
 $$
-G\cdot R_{sub} = \begin{bmatrix}
+G* R_{sub} = \begin{bmatrix}
 -1 & -1\\
 0 & 1\\
 0 & 0
@@ -116,7 +123,7 @@ The product $G*Rsub$ reestablishes the upper-triangular requirement and, because
 
 # Putting it all together
 
-The following Julia code show how one might use this in practice.
+The following Julia code show how one might use this in practice. First we determine what columns to keep, next we loop over $R_{sub}$ to remove non-zero entries, and finally we solve the linear system.
 
 ```julia
 #Loop through lower triangular matrix
@@ -161,16 +168,16 @@ end
 
 # Potential Numerical Instability
 
-A way to measure how accurate a solution $x$ is for the given problem uses a property called the condition number:
+A way to measure how accurate a solution $x$ is for the given problem uses a property called the condition number, defined as:
 
 $$
 \kappa(A) = \|A\| \cdot \|A^{-1}\|  
 $$
 
-Provided the error in the solution to $Ax=b$ is small, the condition number for the linear regression will also remain small. They should scale linearly with each other. However, because we are using the "normal equation" form to solve our system, we effectively square our condition number:
+Provided the error in the solution to $Ax=b$ is small, the condition number for the linear regression will also remain small. They should scale linearly with each other. However, because we are using the normal equation form to solve our system, we effectively square our condition number:
 
 $$
 \kappa(A^\intercal A) = \kappa(A)^2  
 $$
 
-This amplifies errors that occur due to machine precision. Where we might get 9 digits of accuracy before, now we only get 3. This is, of course, dependent on the matrix A, so  it's condition number should be checked before using Q-less decomposition. 
+This amplifies errors that occur due to machine precision. Where we might get 9 digits of accuracy before, now we only get 3. This is, of course, dependent on the matrix A so  it's condition number should be checked before using Q-less decomposition. One rule-of-thumb is to check the resulting coefficients in $x$ for values close to machine precision which would indicate a problem. In this case we might fall back on typical $QR$ decomposition. 

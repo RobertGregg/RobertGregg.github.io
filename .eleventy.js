@@ -4,9 +4,6 @@ const syntaxHighlight = require("@11ty/eleventy-plugin-syntaxhighlight");
 // Formatting Dates and fixing off by one error
 const {DateTime} = require("luxon")
 
-// eleventy-plugin-mathjax was duplicating equations?
-// @sunt-programator/eleventy-plugin-mathjax
-// const mathjaxPlugin = require("eleventy-plugin-mathjax");
 
 const markdownIt = require("markdown-it");
 // Render Math
@@ -29,9 +26,6 @@ module.exports = function (eleventyConfig) {
 
     // Use code hightlighting plugin
     eleventyConfig.addPlugin(syntaxHighlight);
-
-    // Use math plugin
-    // eleventyConfig.addPlugin(mathjaxPlugin);
 
     // Use Javascript to format dates better
     eleventyConfig.addFilter("postDate", (dateObj) => {
