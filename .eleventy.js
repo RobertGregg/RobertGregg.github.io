@@ -13,7 +13,8 @@ const markdownItAttrs = require('markdown-it-attrs')
 const mdOptions = {html: true,breaks: true,linkify: true};
 const markdownLib = markdownIt(mdOptions).use(mathjax3).use(markdownItAttrs);
 
-
+// Mermaid diagrams
+const pluginMermaid = require("@kevingimbel/eleventy-plugin-mermaid")
 
 module.exports = function (eleventyConfig) {
 
@@ -26,6 +27,12 @@ module.exports = function (eleventyConfig) {
 
     // Use code hightlighting plugin
     eleventyConfig.addPlugin(syntaxHighlight);
+
+    //Use mermaid diagrams
+    eleventyConfig.addPlugin(pluginMermaid, {
+        extra_classes: 'diagrams'
+    }
+        );
 
     // Use Javascript to format dates better
     eleventyConfig.addFilter("postDate", (dateObj) => {

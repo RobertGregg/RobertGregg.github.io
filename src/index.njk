@@ -9,7 +9,7 @@ order: 1
 <section class="hero">
     <div class="container flow">
         <div class="hero__content flow">
-            <h1 class="section-title">Welcome to my blog!</h1>
+            <h1 class="section-title">Welcome!</h1>
             <p>I’m a postdoctoral researcher working in the <a href="https://benos.epidemiology.phhp.ufl.edu/">Benos Lab</a>. My current research focuses on combining causal discovery algorithms with supervised machine learning techniques to investigate early COPD progression. The goal is to differentiate people whose disease will rapidly advance from those where the disease is maintained.</p>
             <p>My PhD research was focused on building multiscale mathematical models to understand how the innate immune system responds to disease. I have constructed models that investigated granuloma formation in tuberculosis, DNA detection in the cGAS pathway, and metabolic shifting during sepsis.</p>
             <p>Below are some of my recent publications, or you can go to the blog page to see my most recent posts.</p>
@@ -22,7 +22,7 @@ order: 1
         <div class="profile text-center">
 
             <img src="/assets/images/me.jpg" alt="" class="hero__image">
-
+            
             <p>Postdoctoral Researcher</p>
 
             <p>University of Florida</p>
@@ -69,7 +69,6 @@ order: 1
 <section id="featured-articles" class="featured-articles">
     <div class="container flow">
         <h2 class="section-title text-center ">Featured articles</h2>
-        <p class="text-center">Here is a sample of articles which I feel give you a good idea of what my research is about.</p>
         <ul role="list" class="articles__list flow">
             {% for paper in papers | sort(reverse=true, attribute="year")%}
             {% if paper.featured %}

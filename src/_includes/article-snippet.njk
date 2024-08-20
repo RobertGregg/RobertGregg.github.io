@@ -5,7 +5,8 @@
         <img src="/assets/images/{{ paper.image }}" alt="" class="snippet__image">
         <h3 class="snippet__title"><a href="{{ paper.doi }}" target="_blank">{{ paper.title }}</a></h3>
         <p class="snippet__meta"><span>{{ paper.author }}</span></p>
-        <p class="snippet__body">{{ paper.journal }} vol {{ paper.volume }} pp {{ paper.pages }} {{ paper.year }}</p>
+        <p class="snippet__body">{{ paper.abstract }}</p> 
+        <p class="snippet__footer">{{ paper.journal }} vol {{ paper.volume }} pp {{ paper.pages }} {{ paper.year }}</p>
         <a href="{{ paper.doi }}" target="_blank" class="btn btn--primary">DOI Link</a>
     </article>
 </li>

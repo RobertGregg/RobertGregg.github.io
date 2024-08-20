@@ -190,6 +190,7 @@ main {
 
 .article-title {
   font-size: var(--fs-700);
+  padding-top: 20px;
 }
 
 .section-title {
@@ -383,6 +384,7 @@ main {
     "title"
     "meta"
     "body"
+    "footer"
     "button";
 }
 
@@ -403,8 +405,14 @@ main {
 
 .snippet__body {
   grid-area: body;
+  text-align: justify;
+}
+
+.snippet__footer {
+  grid-area: footer;
   font-style: italic;
 }
+
 
 .snippet__meta span {
   color: var(--clr-neutral-900);
@@ -435,6 +443,7 @@ main {
       "title image"
       "meta image"
       "body image"
+      "footer image"
       "button image";
     grid-column-gap: 4em;
     grid-template-columns: 1fr 40%;
@@ -551,4 +560,10 @@ main {
   .card__link {
     text-decoration: none;
   }
+}
+
+
+/* Mermaid diagrams */
+.diagrams {
+  text-align: center;
 }

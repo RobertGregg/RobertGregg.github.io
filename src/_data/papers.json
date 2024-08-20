@@ -9,6 +9,7 @@
         "title": "Spatial and temporal evolution of lung granulomas in a cynomolgus macaque model of Mycobacterium tuberculosis infection",
         "pages": "110-117",
         "doi": "https://doi.org/10.1016/j.jrid.2018.08.001",
+        "abstract":"Granuloma progression in Mycobacterium tuberculosis infection is not well understood. This study used serial positron emission tomography and computed tomography (PET/CT) on cynomolgus macaques to track lung granulomas during primary and reactivation infections. By analyzing the spatial and temporal patterns, we found that secondary granulomas commonly formed within 2 cm of primary granulomas within the same lung lobe, with an 80% probability during both primary infection and reactivation. A logistic growth function successfully predicted the maximum number of granulomas over the course of infection (R² = 0.96). These findings offer valuable insights into bacterial dissemination dynamics during early infection and reactivation stages of tuberculosis.",
         "cite-key": "gregg2018spatial",
         "entry-type": "article",
         "image": "pub_tb_2018.jpg"
@@ -23,6 +24,7 @@
         "title": "PET CT identifies reactivation risk in cynomolgus macaques with latent M. tuberculosis",
         "pages": "e1005739",
         "doi": "https://doi.org/10.1371/journal.ppat.1005739",
+        "abstract":"Asymptomatic infection with Mycobacterium tuberculosis, often called latent tuberculosis, affects more than 2 billion people. Reactivation of latent infection to active TB occurs in only a minority of those infected, yet can lead to deadly disease and transmission. Here we show, using a non-human primate model, that imaging using PET/CT can identify certain features that are associated with a higher risk of reactivation. These factors include overall lung inflammation, individual granulomas in the lung with higher bacterial burden, and a site of infection outside the lungs. Using these parameters may allow discovery of peripheral biomarkers regarding risk of reactivation from latent TB. Such biomarkers could identify those people who would benefit most from treatment of latent TB to prevent reactivation.",
         "entry-type": "article",
         "cite-key": "lin2016pet",
         "image": "pub_petct_2016.png"
@@ -37,6 +39,7 @@
         "author": "Gregg, Robert W and Sarkar, Saumendra N and Shoemaker, Jason E",
         "volume": "462",
         "doi": "https://doi.org/10.1016/j.jtbi.2018.11.001",
+        "abstract":"Cyclic GMP-AMP synthase (cGAS) is a key protein in detecting cytosolic double-stranded DNA, triggering a type I interferon response crucial for recognizing DNA viruses and self-DNA from damaged cells. Despite its importance, the dynamics of the cGAS pathway are not well understood. This study developed a mathematical model to describe the cGAS pathway dynamics and identify emergent system properties. Parameters were estimated using a Parallel Tempering Markov Chain Monte Carlo (PT-MCMC) approach, resulting in an ensemble of parameterized models. Sensitivity analysis revealed consistent trends across different parameterizations, while in-silico knock-down of TREX1 showed that full inhibition is required to mimic chronic inflammation conditions. The model also accurately replicated interferon expression data from small molecule inhibition of cGAS. This model is valuable for identifying critical components of the cGAS pathway, generating testable hypotheses, and validating experimental findings.",
         "cite-key": "gregg2019mathematical",
         "image": "pub_ode_2019.jpg"
     },
@@ -50,6 +53,7 @@
         "author": "Gregg, Robert W and Sarkar, Saumendra and Shoemaker, Jason E",
         "title": "Examining Dynamic Emergent Properties of the DNA Sensing Pathway",
         "doi": "https://doi.org/10.1016/j.ifacol.2018.09.017",
+        "abstract": "The DNA sensing pathway is a crucial part of the innate immune system, detecting cytosolic DNA and triggering interferon production to alert neighboring cells and induce anti-viral and pro-inflammatory responses. However, the regulatory mechanisms governing this pathway remain poorly understood. To address this, we developed an ordinary differential equation (ODE) model based on existing literature to explore the dynamics of the DNA sensing pathway. Our simulations, including in silico knock-down experiments, revealed that the pathway remains activated in the absence of a negative feedback mechanism for DNA degradation and is robust to various perturbations. This model offers a foundational tool for predicting the effects of pharmaceutical interventions on the DNA sensing pathway, advancing our understanding of its role in pathogen response, cancer, and autoimmunity.",
         "entry-type": "article",
         "cite-key": "gregg2018examining",
         "image": "pub_exam_2018.jpg"
@@ -65,6 +69,7 @@
         "year": "2020",
         "journal": "The Journal of Infectious Diseases",
         "doi": "https://doi.org/10.1093/infdis/jiaa267",
+        "abstract":"The avian influenza A(H7N9) virus has caused high mortality rates in humans, especially in the elderly; however, little is known about the mechanistic basis for this. In the current study, we used nonhuman primates to evaluate the effect of aging on the pathogenicity of A(H7N9) virus. We observed that A(H7N9) virus infection of aged animals (defined as age 20–26 years) caused more severe symptoms than infection of young animals (defined as age 2–3 years). In aged animals, lung inflammation was weak and virus infection was sustained. Although cytokine and chemokine expression in the lungs of most aged animals was lower than that in the lungs of young animals, 1 aged animal showed severe symptoms and dysregulated proinflammatory cytokine and chemokine production. These results suggest that attenuated or dysregulated immune responses in aged animals are responsible for the severe symptoms observed among elderly patients infected with A(H7N9) virus.",
         "entry-type": "article",
         "image": "pub_flu_2020.jpg"
     },
@@ -89,6 +94,7 @@
         "volume": "37",
         "year": "2021",
         "doi": "https://doi.org/10.1093/bioinformatics/btaa969",
+        "abstract": "The cGAS pathway, crucial for detecting pathogenic DNA and triggering interferon beta (IFNβ) production, exhibits stochastic and heterogeneous behavior in immune responses. This study developed an agent-based model to explore how these attributes influence IFNβ production during DNA transfection and viral infection. Results indicate that cellular heterogeneity enhances IFNβ responses, and a moderate level of stochasticity—where 20–30% of cells respond—is sufficient for effective immune protection. Exceeding this response range does not further improve viral load reduction or cell survival. These findings highlight that both heterogeneity and stochasticity play key roles in optimizing immune responses while minimizing cell death during infections.",
         "entry-type": "article",
         "image": "pub_abm_2020.jpg",
         "featured": true
@@ -105,13 +111,14 @@
         "title": "CellularPotts. jl: simulating multiscale cellular models in Julia",
         "year": "2024",
         "doi": "https://doi.org/10.1093/bioinformatics/btad773",
+        "abstract": "CellularPotts.jl is a software package written in Julia to simulate biological cellular processes such as division, adhesion, and signaling. Accurately modeling and predicting these simple processes is crucial because they facilitate more complex biological phenomena related to important disease states like tumor growth, wound healing, and infection. Here we take advantage of Cellular Potts Modeling to simulate cellular interactions and combine them with differential equations to model dynamic cell signaling patterns. These models are advantageous over other approaches because they retain spatial information about each cell while remaining computationally efficient at larger scales. Users of this package define three key inputs to create valid model definitions: a 2- or 3-dimensional space, a table describing the cells to be positioned in that space, and a list of model penalties that dictate cell behaviors. Models can then be evolved over time to collect statistics, simulated repeatedly to investigate how changing a specific property impacts cellular behavior, and visualized using any of the available plotting libraries in Julia.",
         "image": "pub_pott_2024.gif",
         "featured": true
     },
     {
         "entry-type": "article",
         "cite-key": "regan2024early",
-        "year": "2024",
+        "year": "2023",
         "author": "Regan, Elizabeth A and Lowe, Melissa E and Make, Barry J and Curtis, Jeffrey L and Chen, Quan and Crooks, James L and Wilson, Carla and Oates, Gabriela R and Gregg, Robert W and Baldomero, Arianne K and others",
         "title": "Early evidence of chronic obstructive pulmonary disease obscured by race-specific prediction equations",
         "pages": "59-69",
@@ -120,7 +127,24 @@
         "publisher": "American Thoracic Society",
         "journal": "American journal of respiratory and critical care medicine",
         "doi": "https://doi.org/10.1164/rccm.202303-0444OC",
+        "abstract": "Early identification of chronic obstructive pulmonary disease (COPD) is crucial for effective management and treatment, but race-specific spirometry equations may impact the accuracy of diagnosis. This study analyzed data from the COPDGene cohort to compare COPD classifications between African American (AA) and non-Hispanic White individuals using race-specific, multiethnic, and 'race-reversed' spirometry equations. The results showed that race-specific equations often underestimated disease severity in AA participants, particularly in early stages, leading to potential delays in diagnosis. Conversely, race-reversed equations reclassified a significant number of AA participants to more severe stages, emphasizing the need for more inclusive diagnostic approaches to avoid underestimating disease severity in minority populations.",
         "image": "pub_race_2024.jpeg",
+        "featured": true
+    },
+    {
+        "entry-type": "article",
+        "cite-key": "gregg2024identification",
+        "year": "2024",
+        "author": "Gregg, Robert W and Karoleski, Chad M and Silverman, Edwin K and Sciurba, Frank C and DeMeo, Dawn L and Benos, Panayiotis V",
+        "title": "Identification of factors directly linked to incident chronic obstructive pulmonary disease: A causal graph modeling study",
+        "pages": "e1004444",
+        "number": "8",
+        "volume": "21",
+        "publisher": "Public Library of Science San Francisco, CA USA",
+        "journal": "PLoS medicine",
+        "doi": "https://doi.org/10.1371/journal.pmed.1004444",
+        "abstract": "Identifying which healthy individuals with a history of smoking are likely to progress to chronic obstructive pulmonary disease (COPD) remains challenging. This study aimed to determine clinical, genetic, and radiological predictors of future lung function abnormalities in 2,643 COPDGene participants with normal spirometry at enrollment. Using graph modeling, logistic regression, and random forest techniques, six key predictors were identified: forced expiratory flow in the middle range (FEF25-75%), average lung wall thickness (Pi10), severe emphysema, age, sex, and height. These predictors successfully distinguished individuals who maintained normal lung function from those who experienced decline, with logistic regression and random forest models demonstrating high predictive accuracy (AUROC = 0.75 and 0.7, respectively). External validation on a separate cohort confirmed the models' effectiveness (AUROC = 0.89). The findings suggest that emphysema and airway pathology significantly influence early lung function decline, offering valuable insights for predicting COPD progression in smokers with initially normal spirometry.",
+        "image": "pub_progress_2024.png",
         "featured": true
     }
 ]

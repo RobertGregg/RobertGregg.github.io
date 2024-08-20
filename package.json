@@ -17,6 +17,7 @@
     "eleventy-plugin-mathjax": "^2.0.4"
   },
   "dependencies": {
+    "@kevingimbel/eleventy-plugin-mermaid": "^2.2.1",
     "markdown-it": "^14.0.0",
     "markdown-it-attrs": "^4.1.6",
     "markdown-it-mathjax3": "^4.3.2"
