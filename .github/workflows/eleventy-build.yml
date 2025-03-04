@@ -3,7 +3,7 @@ name: Deploy Eleventy to GitHub Pages
 on:
   push:
     branches:
-      - main  # Change this if your default branch is different
+      - master  # Change this if your default branch is different
 
   workflow_dispatch:  # Allows manual triggering from GitHub UI
 
