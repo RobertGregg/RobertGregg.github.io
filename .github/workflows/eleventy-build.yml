@@ -34,7 +34,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _site  # Change if Eleventy outputs to a different folder
+          path: public  # Change if Eleventy outputs to a different folder
 
   deploy:
     needs: build
