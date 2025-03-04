@@ -1,18 +1,49 @@
-name: Eleventy Build
-on: [push]
+name: Deploy Eleventy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Change this if your default branch is different
+
+  workflow_dispatch:  # Allows manual triggering from GitHub UI
+
+permissions:
+  contents: read  # Allows reading repo contents
+  pages: write  # Allows publishing to GitHub Pages
+  id-token: write  # Needed for authentication with GitHub Pages
 
 jobs:
-  build_deploy:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@master
-      - name: Build
-        uses: TartanLlama/actions-eleventy@master
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          install_dependencies: true
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+          node-version: 18  # Ensure compatibility with your project
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Eleventy site
+        run: npx @11ty/eleventy
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          publish_dir: public
-          publish_branch: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          path: _site  # Change if Eleventy outputs to a different folder
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
